@@ -16,17 +16,30 @@ import java.util.*;
 public class OpenApiConfiguration {
     @Bean OpenAPI compassOpenApi() {
         return new OpenAPI().info(new Info().title("Compass API").version("v1").description("""
-            Spring Security 세션 인증. JWT를 사용하지 않습니다.
-            Swagger UI는 같은 출처의 JSESSIONID 쿠키를 자동 전송합니다. Authorize에서 쿠키를 입력할 필요가 없습니다.
-            변경 요청마다 인터셉터가 GET /api/v1/auth/csrf에서 최신 토큰을 받아 X-CSRF-TOKEN 헤더에 넣습니다.
-            signup/email/availability → signup/email/send → signup/email/confirm → signup → login → me 순으로 실행하세요. 가입은 자동 로그인하지 않으며 로그인 시 세션 ID와 CSRF 토큰이 회전합니다. 가입·로그인 모두 schoolEmail을 사용하며 별도 아이디는 받지 않습니다.
-            화면 순서: 이메일 인증·가입·로그인 → PATCH /me(학생 기본 정보), PUT /me/majors(전공), 선택적 성적표 미리보기·확인 → PUT /me/career-goal(목표 설정) → 선택적 프로젝트·인턴·수상·자격증 입력 또는 건너뛰기.
-            학교 이메일은 회원가입 전에 같은 브라우저 세션에서 인증해야 합니다. 인증 완료 후 10분 안에 가입하며 증명은 한 번만 사용됩니다. 기존 미인증 계정은 /me/email-verification으로 인증할 수 있습니다.
-            비밀번호 변경 후에는 다시 로그인해야 합니다. 탈퇴 시 계정이 영구 삭제되어 기존 계정으로 로그인할 수 없습니다.
-            문서는 API_DOCS_ENABLED=true일 때만 공개됩니다. 신뢰할 수 있는 개발 환경에서 활성화하세요.
+            ### 인증과 Swagger 사용
+            Compass는 Spring Security 세션으로 로그인 상태를 확인합니다. Compass 서버가 제공하는 Swagger UI에서 로그인하면 브라우저가 같은 출처의 `JSESSIONID` 쿠키를 자동으로 전송합니다. Authorize에 쿠키 값을 입력할 필요가 없습니다.
+
+            Compass Swagger UI의 인터셉터는 변경 요청마다 `GET /api/v1/auth/csrf`를 호출해 토큰을 받고 `X-CSRF-TOKEN` 헤더에 넣습니다. OpenAPI JSON을 외부 Swagger Editor에서 열면 이 인터셉터는 함께 로드되지 않습니다. 프론트엔드에서 직접 연동할 때는 같은 세션의 쿠키를 보내고, 변경 요청 전에 CSRF 응답의 `headerName`에 `token`을 설정하세요.
+
+            ### 학교 이메일 인증과 로그인
+            신규 가입은 `POST /api/v1/auth/signup/email/availability` → `POST /api/v1/auth/signup/email/send` → `POST /api/v1/auth/signup/email/confirm` → `POST /api/v1/auth/signup` 순서로 진행합니다. 같은 브라우저 세션에서 이메일 인증을 마치고 10분 안에 가입하세요. 가입 증명은 한 번만 사용됩니다.
+
+            가입 후 `POST /api/v1/auth/login`으로 로그인하고 `GET /api/v1/me`로 프로필을 확인합니다. 가입과 로그인에는 `schoolEmail`을 사용합니다. 로그인하면 세션 ID와 CSRF 토큰이 갱신됩니다.
+
+            기존 미인증 계정은 로그인한 뒤 `POST /api/v1/me/email-verification`으로 번호를 발송하고 `POST /api/v1/me/email-verification/confirm`으로 인증을 완료합니다.
+
+            ### 학생 온보딩
+            1. `PATCH /api/v1/me`로 학생 기본 정보를, `PUT /api/v1/me/majors`로 전공 목록을 저장합니다.
+            2. 성적표를 첨부한 경우 `POST /api/v1/me/courses/import/preview`에 XLSX 파일을 업로드합니다. 미리보기에서 과목과 평점, 정규 이수학기를 확인한 뒤 같은 세션에서 `POST /api/v1/me/courses/import/confirm-all`에 `previewId`를 보내 전체 저장합니다.
+            3. 기본 정보, 전공, 첨부한 성적표의 저장이 모두 성공하면 `PATCH /api/v1/me/onboarding`으로 해당 단계 상태를 갱신합니다.
+            4. `PUT /api/v1/me/career-goal`로 취업 목표를 저장한 뒤 프로젝트·인턴·수상·자격증을 입력하거나 건너뜁니다.
+
+            비밀번호를 변경한 뒤에는 다시 로그인해야 합니다. 회원탈퇴는 계정과 연결된 개인 데이터를 영구 삭제합니다.
+
+            문서는 `API_DOCS_ENABLED=true`인 신뢰할 수 있는 개발 환경에서 사용하세요.
             """)).components(new Components()
                 .addSecuritySchemes("sessionCookie",new SecurityScheme().type(SecurityScheme.Type.APIKEY).in(SecurityScheme.In.COOKIE).name("JSESSIONID").description("로그인 응답으로 브라우저에 설정되는 HttpOnly 세션 쿠키"))
-                .addSecuritySchemes("csrfToken",new SecurityScheme().type(SecurityScheme.Type.APIKEY).in(SecurityScheme.In.HEADER).name("X-CSRF-TOKEN").description("GET /api/v1/auth/csrf 응답의 token. Swagger UI가 자동으로 갱신합니다."))
+                .addSecuritySchemes("csrfToken",new SecurityScheme().type(SecurityScheme.Type.APIKEY).in(SecurityScheme.In.HEADER).name("X-CSRF-TOKEN").description("GET /api/v1/auth/csrf 응답의 token. Compass 서버가 제공하는 Swagger UI에서 자동으로 갱신합니다."))
                 .addSchemas("ApiError",new ObjectSchema().addProperty("code",new StringSchema()).addProperty("message",new StringSchema()).required(List.of("code","message"))));
     }
 
