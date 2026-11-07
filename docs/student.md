@@ -1,15 +1,15 @@
 # 학생 DB·입력 API — V16
 
-학교 이메일 인증 후 가입하며 schoolEmail과 password로 세션 로그인한다. 별도 loginId는 요청·응답에서 제거했다. 성적표 미리보기·확인 저장, 프로젝트 README 수집과 온보딩 API를 제공한다.
+학교 이메일 인증 후 가입하며 schoolEmail과 password로 세션 로그인한다. 성적표 미리보기·확인 저장, 프로젝트 README 수집과 온보딩 API를 제공한다.
 
-학생 정보 화면은 PATCH /api/v1/me(학번 studentNumber, 이름, 편입 여부, 정규 이수학기 수 semester 0 이상, gpa/gpaScale)와 PUT /api/v1/me/majors(전공·이수 구분)를 사용한다. 학번은 최초 등록 후 변경 불가이고 평점은 만점 이하여야 한다.
-목표 설정/수정 화면은 GET/PUT /api/v1/me/career-goal을 사용한다. jobCategoryCode(공고 공통 직무 코드), companySizes(1~4개), targetSalary(만원 단위 연봉), regionCodes, targetCompany, targetDate(YYYY-MM)가 필요하다. 이전 companySize 요청도 지원하며 careerType과 targetRole을 생략하면 저장된 값이 보존된다. 지역은 기존 preferences와 공유한다. 성적·프로젝트·인턴·수상·자격증은 기존 개별 API로 입력하고 온보딩 상태를 별도로 저장한다. 진단·로드맵 생성은 목표 저장만으로 실행되지 않는다.
-배포된 화면의 studentId(학번)는 studentNumber로, 학과명은 전공 code로 연결해야 한다. 반기 선택은 연월 입력으로, 학번 로그인은 학교 이메일/비밀번호 로그인으로 변경해야 한다.
+학생 정보 화면은 PATCH /api/v1/me(이름, 편입 여부, 정규 이수학기 수 semester 0 이상, gpa/gpaScale)와 PUT /api/v1/me/majors(전공·이수 구분)를 사용한다. 평점은 만점 이하여야 한다.
+목표 설정/수정 화면은 GET/PUT /api/v1/me/career-goal을 사용한다. jobCategoryCode(공고 공통 직무 코드), companySizes(1~4개), targetSalary(만원 단위 연봉), regionCodes, targetCompany, targetDate(YYYY-MM)가 필요하다. 지역은 기존 preferences와 공유한다. 성적·프로젝트·인턴·수상·자격증은 기존 개별 API로 입력하고 온보딩 상태를 별도로 저장한다. 진단·로드맵 생성은 목표 저장만으로 실행되지 않는다.
+학과명은 전공 code로 연결한다.
 
 ## 테이블
 
-- student: id, login_id(기존 데이터 보존용 nullable), password_hash, school_email, name, is_transfer, student_number(8자리·UNIQUE), semester(성적표의 정규 이수학기 수), gpa, gpa_scale.
-- student_career_goal: student_id(PK), job_field, job_category_code, company_size(이전 클라이언트용), target_salary, career_type, target_company, target_role, target_date(해당 월 1일).
+- student: id, password_hash, school_email, name, is_transfer, semester(성적표의 정규 이수학기 수), gpa, gpa_scale.
+- student_career_goal: student_id(PK), job_category_code(필수), target_salary, target_company, target_date(해당 월 1일).
 - student_career_goal_company_size: student_id와 company_size의 복합 키로 복수 선택을 저장한다. 기존 단일 선택은 V18에서 한 항목으로 복사한다.
 - major: code, name, college_name.
 - major_completion_type: code, name.
@@ -34,7 +34,7 @@
 - 수상은 수상명·주최기관·설명만 받는다. 설명은 선택이며 등급·역할 등을 자유롭게 작성할 수 있다.
 - 보유 자격증은 종류만 연결한다. 취득/만료일·등급·점수 필드는 없다. 종류별 현재 보유 연결 하나다.
 - 졸업 예정 연월, 비교과, 부트캠프, 인턴 사용 기술 저장 구조는 제거했다. 프로젝트 사용 기술 연결은 V7에서 다시 추가했다.
-- 학생·활동 ID는 BIGINT IDENTITY, 학교 이메일·학번은 UNIQUE이며 기존 login_id UNIQUE도 보존한다. 신규 계정에는 login_id를 저장하지 않는다. 삭제는 기존 RESTRICT 정책이며 자동 연쇄 삭제하지 않는다.
+- 학생·활동 ID는 BIGINT IDENTITY, 학교 이메일은 UNIQUE다. 삭제는 기존 RESTRICT 정책이며 자동 연쇄 삭제하지 않는다.
 - 희망 직무·지역·고용형태·급여 단위는 공고 공용 코드 테이블을 재사용한다. 원 금액·단위를 유지한다.
 - 수업의 학수번호 앞자리 0, 재수강별 기록, P/NP, NULL 평점은 유지한다.
 

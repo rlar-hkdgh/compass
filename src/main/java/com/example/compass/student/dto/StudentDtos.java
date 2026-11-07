@@ -8,10 +8,9 @@ public final class StudentDtos {
     private StudentDtos() {
     }
     public record Profile(long id,String schoolEmail,String name,boolean isTransfer,boolean emailVerified,
-                          String studentNumber,Integer semester,BigDecimal gpa,BigDecimal gpaScale) {
+                          Integer semester,BigDecimal gpa,BigDecimal gpaScale) {
     }
     public record ProfilePatch(@Size(max=100) String name,Boolean isTransfer,
-        @Pattern(regexp="[0-9]{8}") String studentNumber,
         @PositiveOrZero Integer semester,
         @DecimalMin("0.0") @Digits(integer=1,fraction=2) BigDecimal gpa,
         @DecimalMin(value="0.0",inclusive=false) @DecimalMax("4.5") @Digits(integer=1,fraction=2) BigDecimal gpaScale) {

@@ -164,7 +164,8 @@ class AccountIntegrationTests {
     }
     void personalRows(Account a) {
         long id=a.id();
-        db.update("insert into student_career_goal(student_id,job_category_code,company_size,target_salary,career_type,target_company,target_role,target_date) values(?,'84','LARGE',5000,'NEW','기업','개발자',DATE '2027-06-01')",id);
+        db.update("insert into student_career_goal(student_id,job_category_code,target_salary,target_company,target_date) values(?,'84',5000,'기업',DATE '2027-06-01')",id);
+        db.update("insert into student_career_goal_company_size values(?,'LARGE')",id);
         var project=students.saveProject(id,null,new StudentDtos.ProjectInput("프로젝트","개요","설명",null,"https://github.com/example/example",List.of()));
         db.update("insert into student_project_readme(project_id,repository_url,last_attempt_at,last_attempt_status) values(?,?,CURRENT_TIMESTAMP,'FAILED')",project.id(),"https://github.com/example/example");
         String tech=db.queryForObject("select min(code) from tech_stack",String.class);
@@ -331,7 +332,11 @@ class AccountIntegrationTests {
         var a=account();var paths=spec.get("paths");
         var patch=paths.get("/api/v1/me").get("patch");
         var profile=json.convertValue(patch.get("requestBody").get("content").get("application/json").get("examples").get("학생 정보").get("value"),Map.class);
-        profile.put("studentNumber",String.format("%08d",new java.security.SecureRandom().nextInt(100000000)));
+        for (String schema : List.of("Profile", "ProfilePatch"))
+            assertThat(schemas.get(schema).get("properties").has("studentNumber")).isFalse();
+        for (String schema : List.of("CareerGoal", "CareerGoalInput"))
+            for (String field : List.of("legacyJobField", "careerType", "targetRole", "companySize"))
+                assertThat(schemas.get(schema).get("properties").has(field)).isFalse();
         send("PATCH","/api/v1/me",a.session(),profile).andExpect(status().isOk()).andExpect(jsonPath("$.semester").value(6)).andExpect(jsonPath("$.gradeYear").doesNotHaveJsonPath());
         var goal=paths.get("/api/v1/me/career-goal").get("put");
         assertThat(goal.get("security").get(0).has("sessionCookie")).isTrue();assertThat(goal.get("security").get(0).has("csrfToken")).isTrue();

@@ -132,7 +132,7 @@ public class TranscriptImportService {
 
     private void saveTranscriptProfile(long student, BigDecimal gpa, Integer semesters) {
         if (gpa != null || semesters != null) {
-            students.patch(student, new ProfilePatch(null, null, null, semesters, gpa, gpa == null ? null : new BigDecimal("4.5")));
+            students.patch(student, new ProfilePatch(null, null, semesters, gpa, gpa == null ? null : new BigDecimal("4.5")));
         }
     }
 

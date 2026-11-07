@@ -16,7 +16,7 @@ class StudentProjectV7PersistenceTests {
  @Autowired StudentProjectTechStackRepository techLinks;
  @Autowired EntityManager em;
  private StudentProject project() {
-  var s=new Student();s.setLoginId("project_v7");s.setPasswordHash("hash");s.setSchoolEmail("project_v7@sju.ac.kr");s.setName("student");s.setIsTransfer(false);students.saveAndFlush(s);
+  var s=new Student();s.setPasswordHash("hash");s.setSchoolEmail("project_v7@sju.ac.kr");s.setName("student");s.setIsTransfer(false);students.saveAndFlush(s);
   var p=new StudentProject();p.setStudentId(s.getId());p.setName("project");p.setOverview("purpose and core functions");p.setDescription("my role and implementation");return p;
  }
  @Test void roundTripsOverviewContributionOptionalOutcomeAndMultipleTechReferences() {

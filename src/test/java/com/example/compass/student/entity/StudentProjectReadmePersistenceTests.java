@@ -20,7 +20,7 @@ class StudentProjectReadmePersistenceTests {
     @Autowired EntityManager em;
 
     @Test void roundTripsLargeMarkdownAndRetainsSuccessAfterFailedAttempt() {
-        var student=new Student();student.setLoginId("readme_user");student.setPasswordHash("hash");student.setSchoolEmail("readme@sju.ac.kr");student.setName("student");student.setIsTransfer(false);students.saveAndFlush(student);
+        var student=new Student();student.setPasswordHash("hash");student.setSchoolEmail("readme@sju.ac.kr");student.setName("student");student.setIsTransfer(false);students.saveAndFlush(student);
         var project=new StudentProject();project.setStudentId(student.getId());project.setOverview("프로젝트 목적과 핵심 기능");project.setName("project");project.setDescription("my contribution");project.setGithubUrl("https://github.com/example/repo");projects.saveAndFlush(project);
         assertThat(readmes.findById(project.getId())).isEmpty();
         var readme=new StudentProjectReadme();readme.setProjectId(project.getId());readme.setRepositoryUrl(project.getGithubUrl());

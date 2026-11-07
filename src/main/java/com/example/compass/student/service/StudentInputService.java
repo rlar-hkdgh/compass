@@ -20,28 +20,23 @@ import static com.example.compass.student.dto.StudentDtos.*;
         return db.query("""
             select s.id,s.school_email,s.name,s.is_transfer,
                 (v.verified_at is not null and v.school_email=s.school_email) as email_verified,
-                s.student_number,s.semester,s.gpa,s.gpa_scale
+                s.semester,s.gpa,s.gpa_scale
             from student s left join student_email_verification v on v.student_id=s.id where s.id=?
             """,(r,n)->new Profile(r.getLong(1),r.getString(2),r.getString(3),r.getBoolean(4),r.getBoolean(5),
-                r.getString(6),r.getObject(7,Integer.class),r.getBigDecimal(8),r.getBigDecimal(9)),student)
+                r.getObject(6,Integer.class),r.getBigDecimal(7),r.getBigDecimal(8)),student)
             .stream().findFirst().orElseThrow(ApiErrors::missing);
     }
     public Profile patch(long student,ProfilePatch q){
         lock(student);
         Profile current=profile(student);
-        if(q.studentNumber()!=null && current.studentNumber()!=null && !q.studentNumber().equals(current.studentNumber()))
-            throw new ApiErrors.Failure(409,"STUDENT_NUMBER_IMMUTABLE","등록한 학번은 변경할 수 없습니다.");
-        if(q.studentNumber()!=null && db.queryForObject("select count(*) from student where student_number=? and id<>?",Integer.class,q.studentNumber(),student)>0)
-            throw new ApiErrors.Failure(409,"STUDENT_NUMBER_EXISTS","이미 등록된 학번입니다.");
         var gpa=q.gpa()==null?current.gpa():q.gpa();
         var scale=q.gpaScale()==null?current.gpaScale():q.gpaScale();
         if((gpa==null)!=(scale==null) || (gpa!=null && gpa.compareTo(scale)>0))
             throw ApiErrors.invalid("평점과 만점은 함께 설정해야 하며 평점은 만점 이하여야 합니다.");
         if(q.name()!=null && q.name().isBlank())throw ApiErrors.invalid("이름은 공백일 수 없습니다.");
         db.update("""
-            update student set name=?,is_transfer=?,student_number=?,semester=?,gpa=?,gpa_scale=? where id=?
+            update student set name=?,is_transfer=?,semester=?,gpa=?,gpa_scale=? where id=?
             """,q.name()==null?current.name():q.name(),q.isTransfer()==null?current.isTransfer():q.isTransfer(),
-            q.studentNumber()==null?current.studentNumber():q.studentNumber(),
             q.semester()==null?current.semester():q.semester(),gpa,scale,student);
         return profile(student);
     }

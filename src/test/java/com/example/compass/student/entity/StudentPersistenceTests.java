@@ -26,7 +26,7 @@ class StudentPersistenceTests {
 
     private Student student() {
         var s=new Student();
-        s.setLoginId("test_user");s.setPasswordHash("stored-password-hash");
+        s.setPasswordHash("stored-password-hash");
         s.setSchoolEmail("test_user@sju.ac.kr");s.setName("학생");s.setIsTransfer(false);
         return students.saveAndFlush(s);
     }
@@ -39,12 +39,12 @@ class StudentPersistenceTests {
         assertThat(restored.getDescription()).isEqualTo("역할·구현 내용·성과");
         assertThat(restored.getStudent().getName()).isEqualTo("학생");
     }
-    @Test void loginRenameDoesNotChangeStudentMajorReference() {
+    @Test void profileNameChangeDoesNotChangeStudentMajorReference() {
         var s=student();
         var major=new Major();major.setCode("TEST");major.setName("테스트전공");majors.saveAndFlush(major);
         var key=new StudentMajorId(s.getId(),"TEST","PRIMARY");
         var link=new StudentMajor();link.setId(key);studentMajors.saveAndFlush(link);
-        s.setLoginId("renamed");students.saveAndFlush(s);em.clear();
-        assertThat(studentMajors.findById(key).orElseThrow().getStudent().getLoginId()).isEqualTo("renamed");
+        s.setName("renamed");students.saveAndFlush(s);em.clear();
+        assertThat(studentMajors.findById(key).orElseThrow().getStudent().getName()).isEqualTo("renamed");
     }
 }

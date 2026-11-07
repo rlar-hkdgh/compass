@@ -341,10 +341,8 @@ import static org.assertj.core.api.Assertions.*;
         assertThat(s.isInvalid()).isTrue();
     }
 
-    @Test void schoolEmailIsTheOnlyAuthenticationIdentifierAndLegacyAccountsStillWork() throws Exception {
+    @Test void schoolEmailIsTheOnlyAuthenticationIdentifier() throws Exception {
         var a=account();
-        assertThat(db.queryForObject("select login_id from student where id=?",String.class,a.id())).isNull();
-        db.update("update student set login_id=? where id=?",a.login(),a.id());
         String hash=db.queryForObject("select password_hash from student where id=?",String.class,a.id());
         var session=login(a);
         mvc.perform(get("/api/v1/me").session(session)).andExpect(jsonPath("$.schoolEmail").value(a.email()))
@@ -353,7 +351,6 @@ import static org.assertj.core.api.Assertions.*;
         send("POST","/api/v1/auth/login",anonymous(),Map.of("schoolEmail",a.login(),"password",a.password())).andExpect(status().isBadRequest());
         for(String email:List.of("someone@example.com",a.email().toUpperCase(Locale.ROOT),"bad@@sju.ac.kr"))
             send("POST","/api/v1/auth/login",anonymous(),Map.of("schoolEmail",email,"password",a.password())).andExpect(status().isBadRequest());
-        assertThat(db.queryForObject("select login_id from student where id=?",String.class,a.id())).isEqualTo(a.login());
         assertThat(db.queryForObject("select password_hash from student where id=?",String.class,a.id())).isEqualTo(hash);
     }
     @Test void emailLongerThanLegacyIdentifierLimitCanSignupAndLogin() throws Exception {
@@ -380,26 +377,19 @@ import static org.assertj.core.api.Assertions.*;
         assertThat(groupedCodes).containsExactlyInAnyOrderElementsOf(flatCodes);
     }
 
-    String studentNumber(){return String.format("%08d",new java.security.SecureRandom().nextInt(100000000));}
     @Test void studentInformationSupportsScreenFieldsAndPartialUpdatesWithoutChangingIdentity() throws Exception {
-        var a=account();var session=login(a);String number=studentNumber();
-        send("PATCH","/api/v1/me",session,Map.of("name","홍길동","studentNumber",number,"semester",6,"gpa",3.85,"gpaScale",4.5))
-            .andExpect(status().isOk()).andExpect(jsonPath("$.studentNumber").value(number)).andExpect(jsonPath("$.gpa").value(3.85));
+        var a=account();var session=login(a);
+        send("PATCH","/api/v1/me",session,Map.of("name","홍길동","semester",6,"gpa",3.85,"gpaScale",4.5))
+            .andExpect(status().isOk()).andExpect(jsonPath("$.studentNumber").doesNotHaveJsonPath()).andExpect(jsonPath("$.gpa").value(3.85));
         send("PATCH","/api/v1/me",session,Map.of("name","변경","gpa",4.0)).andExpect(status().isOk())
             .andExpect(jsonPath("$.gpa").value(4.0)).andExpect(jsonPath("$.gpaScale").value(4.5)).andExpect(jsonPath("$.semester").value(6));
-        send("PATCH","/api/v1/me",session,Map.of("studentNumber",number)).andExpect(status().isOk());
-        send("PATCH","/api/v1/me",session,Map.of("name","반영되면 안 됨","studentNumber",number.equals("11111111")?"22222222":"11111111"))
-            .andExpect(status().isConflict()).andExpect(jsonPath("$.code").value("STUDENT_NUMBER_IMMUTABLE"));
-        var other=account();send("PATCH","/api/v1/me",login(other),Map.of("studentNumber",number))
-            .andExpect(status().isConflict()).andExpect(jsonPath("$.code").value("STUDENT_NUMBER_EXISTS"));
         mvc.perform(get("/api/v1/me").session(session)).andExpect(jsonPath("$.name").value("변경"))
-            .andExpect(jsonPath("$.schoolEmail").value(a.email())).andExpect(jsonPath("$.studentNumber").value(number))
+            .andExpect(jsonPath("$.schoolEmail").value(a.email())).andExpect(jsonPath("$.studentNumber").doesNotHaveJsonPath())
             .andExpect(jsonPath("$.semester").value(6)).andExpect(jsonPath("$.gradeYear").doesNotHaveJsonPath());
     }
     @Test void studentInformationRejectsInvalidRangesAndGpaCombinationsAtomically() throws Exception {
         var session=login(account());
-        for(Map<String,Object> bad:List.<Map<String,Object>>of(Map.of("studentNumber","1234567"),Map.of("studentNumber","1234abcd"),
-            Map.of("semester",-1),Map.of("gpa",3.0),
+        for(Map<String,Object> bad:List.<Map<String,Object>>of(Map.of("semester",-1),Map.of("gpa",3.0),
             Map.of("gpaScale",4.5),Map.of("gpa",-1,"gpaScale",4.5),Map.of("gpa",4.6,"gpaScale",4.5),
             Map.of("gpa",0,"gpaScale",0),Map.of("gpa",3.001,"gpaScale",4.5),Map.of("gpa",4,"gpaScale",5)))
             send("PATCH","/api/v1/me",session,bad).andExpect(status().isBadRequest()).andExpect(jsonPath("$.code").value("INVALID_REQUEST"));
@@ -428,35 +418,19 @@ import static org.assertj.core.api.Assertions.*;
         var other=login(account());mvc.perform(get("/api/v1/me/career-goal").session(other)).andExpect(status().isNotFound());
         mvc.perform(get("/api/v1/me/onboarding").session(session)).andExpect(jsonPath("$.completedSteps").value(0));
     }
-    @Test void careerGoalCanReselectAnAmbiguousLegacyJob() throws Exception {
-        var a=account();var session=login(a);
-        db.update("""
-            insert into student_career_goal(student_id,job_field,company_size,target_salary,career_type,target_company,target_role,target_date)
-            values(?,'DATA','LARGE',5000,'NEW','네이버','데이터 분석',DATE '2027-06-01')
-            """,a.id());
-        mvc.perform(get("/api/v1/me/career-goal").session(session)).andExpect(status().isOk())
-            .andExpect(jsonPath("$.jobCategoryCode").doesNotExist()).andExpect(jsonPath("$.legacyJobField").value("DATA"))
-            .andExpect(jsonPath("$.targetCompany").value("네이버"));
+    @Test void careerGoalUsesOnlyCurrentJobAndCompanySelections() throws Exception {
+        var session=login(account());
         var goal=careerGoal();
-        goal.put("jobCategoryCode","82");
         send("PUT","/api/v1/me/career-goal",session,goal).andExpect(status().isOk())
-            .andExpect(jsonPath("$.jobCategoryCode").value("82")).andExpect(jsonPath("$.legacyJobField").value("DATA"))
-            .andExpect(jsonPath("$.careerType").value("NEW")).andExpect(jsonPath("$.targetRole").value("데이터 분석"))
-            .andExpect(jsonPath("$.companySizes[0]").value("LARGE")).andExpect(jsonPath("$.companySizes[1]").value("SMALL"));
-    }
-
-    @Test void careerGoalAcceptsLegacySingleSizeAndCanSwitchToSmallOnly() throws Exception {
-        var a=account();var session=login(a);
-        var legacy=careerGoal();
-        legacy.remove("companySizes");legacy.put("companySize","MID");legacy.put("careerType","EXPERIENCED");legacy.put("targetRole","기존 직무명");
-        send("PUT","/api/v1/me/career-goal",session,legacy).andExpect(status().isOk())
-            .andExpect(jsonPath("$.companySizes[0]").value("MID"));
-        var current=careerGoal();current.put("companySizes",List.of("SMALL"));
-        send("PUT","/api/v1/me/career-goal",session,current).andExpect(status().isOk())
-            .andExpect(jsonPath("$.companySizes.length()").value(1)).andExpect(jsonPath("$.companySizes[0]").value("SMALL"));
+            .andExpect(jsonPath("$.companySizes.length()").value(2));
+        goal.put("jobCategoryCode","82");
+        goal.put("companySizes",List.of("SMALL"));
+        send("PUT","/api/v1/me/career-goal",session,goal).andExpect(status().isOk());
         mvc.perform(get("/api/v1/me/career-goal").session(session)).andExpect(status().isOk())
-            .andExpect(jsonPath("$.companySize").value("SMALL")).andExpect(jsonPath("$.companySizes[0]").value("SMALL"))
-            .andExpect(jsonPath("$.careerType").value("EXPERIENCED")).andExpect(jsonPath("$.targetRole").value("기존 직무명"));
+            .andExpect(jsonPath("$.jobCategoryCode").value("82"))
+            .andExpect(jsonPath("$.companySizes.length()").value(1)).andExpect(jsonPath("$.companySizes[0]").value("SMALL"))
+            .andExpect(jsonPath("$.companySize").doesNotHaveJsonPath()).andExpect(jsonPath("$.legacyJobField").doesNotHaveJsonPath())
+            .andExpect(jsonPath("$.careerType").doesNotHaveJsonPath()).andExpect(jsonPath("$.targetRole").doesNotHaveJsonPath());
     }
 
     @Test void careerGoalValidatesYearMonthEnumsCodesAndMandatoryFields() throws Exception {

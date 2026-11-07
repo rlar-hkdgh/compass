@@ -70,16 +70,15 @@ final class OpenApiReview {
   }
   if(path.startsWith("/internal/"))description="내부 입력 기능이며 import-enabled=true일 때만 등록됩니다. 기존 보안 정책상 HTTP 접근은 차단되므로 Swagger에서 실행할 수 없습니다. 공고 저장은 출처와 공고 식별값으로 갱신합니다. 접수 시작은 종료보다 늦을 수 없고 급여는 0 이상, 최소 금액은 최대 금액 이하여야 합니다. 급여 금액을 지정하면 지급 단위와 DISCLOSED 결정 코드가 필요합니다. 자세한 필드 제한은 요청 스키마를 확인하세요.";
   if(path.equals("/api/v1/me") && (get || method==PathItem.HttpMethod.PATCH)){
-   description=get?"본인 프로필과 학생 기본 정보를 조회합니다. schoolEmail이 로그인 식별자이며 별도 아이디는 반환하지 않습니다. 학번·정규 이수학기 수·전체 평점/만점은 미입력 시 null입니다.":
-    "학생 정보 화면의 이름·편입 여부·학번(studentNumber)·정규 이수학기 수(semester, 0 이상)·전체 평점(gpa)/만점(gpaScale)을 부분 수정합니다. 생략 또는 null 필드는 유지합니다. 학번은 8자리 숫자로 최초 등록 후 변경 불가입니다. 평점은 0 이상, 만점은 0 초과 4.5 이하이고 평점은 만점 이하여야 합니다. 최초 평점/만점은 함께 지정하세요. 학과·복수전공·부전공은 별도 PUT /api/v1/me/majors에서 전공 코드와 이수 구분 코드로 저장합니다. 화면의 studentId 학번은 이 API의 studentNumber에 대응하며 id는 계정 내부 식별자입니다. 로그인 세션과 CSRF 토큰이 필요합니다.";
+   description=get?"본인 프로필과 학생 기본 정보를 조회합니다. schoolEmail이 로그인 식별자이며 별도 아이디는 반환하지 않습니다. 정규 이수학기 수·전체 평점/만점은 미입력 시 null입니다.":
+    "학생 정보 화면의 이름·편입 여부·정규 이수학기 수(semester, 0 이상)·전체 평점(gpa)/만점(gpaScale)을 부분 수정합니다. 생략 또는 null 필드는 유지합니다. 평점은 0 이상, 만점은 0 초과 4.5 이하이고 평점은 만점 이하여야 합니다. 최초 평점/만점은 함께 지정하세요. 학과·복수전공·부전공은 별도 PUT /api/v1/me/majors에서 전공 코드와 이수 구분 코드로 저장합니다. 로그인 세션과 CSRF 토큰이 필요합니다.";
    if(!get){
-    op.getResponses().get("409").setDescription("STUDENT_NUMBER_EXISTS: 이미 등록된 학번 / STUDENT_NUMBER_IMMUTABLE: 등록 후 학번 변경 불가 / DATA_CONFLICT: 중복 또는 참조 충돌");
-    op.getRequestBody().getContent().get("application/json").addExamples("학생 정보",new Example().summary("학생 정보 화면 저장").value(Map.of("name","홍길동","isTransfer",false,"studentNumber","20211234","semester",6,"gpa",3.85,"gpaScale",4.5)));
+    op.getRequestBody().getContent().get("application/json").addExamples("학생 정보",new Example().summary("학생 정보 화면 저장").value(Map.of("name","홍길동","isTransfer",false,"semester",6,"gpa",3.85,"gpaScale",4.5)));
    }
   }
   if(path.equals("/api/v1/me/career-goal")){
    op.setSummary(get?"취업 목표 조회":"취업 목표 전체 저장");
-   description="목표 설정·희망 직무 변경 화면에서 사용하는 본인 취업 목표입니다. GET은 미등록 시 404 ITEM_NOT_FOUND, PUT은 신규/수정 모두 200입니다. companySizes로 기업 규모를 1~4개 선택합니다. 이전 companySize 단일 필드도 받을 수 있고, careerType과 targetRole을 생략하면 기존 값을 유지합니다. jobCategoryCode는 GET /api/v1/student-codes/job-categories의 공고 공통 코드를 사용합니다. 기존 직무에 직접 대응하는 코드가 없으면 GET의 jobCategoryCode는 null이며, PUT에서 새 코드를 선택해야 합니다. targetDate는 취업 목표 연월 YYYY-MM(1900-01~2100-12), targetSalary는 만원 단위 연봉입니다. regionCodes는 GET /api/v1/student-codes/regions/grouped의 regions 안에 있는 code를 사용합니다. 평면 목록은 GET /api/v1/student-codes/regions에서도 조회할 수 있습니다. 지역은 기존 preferences.regionCodes와 같은 저장소를 공유하므로 어느 API로 변경해도 다른 조회에 반영됩니다. 다른 선호 항목과 성적·이력은 변경하지 않습니다. 저장과 지역 교체는 한 트랜잭션으로 처리합니다. 목표 저장만으로 진단·분석·로드맵을 생성하거나 온보딩을 자동 완료하지 않습니다. 로그인 세션과 PUT 요청의 CSRF 토큰이 필요합니다.";
+   description="목표 설정·희망 직무 변경 화면에서 사용하는 본인 취업 목표입니다. GET은 미등록 시 404 ITEM_NOT_FOUND, PUT은 신규/수정 모두 200입니다. companySizes로 기업 규모를 1~4개 선택합니다. jobCategoryCode는 GET /api/v1/student-codes/job-categories의 공고 공통 코드를 사용합니다. targetDate는 취업 목표 연월 YYYY-MM(1900-01~2100-12), targetSalary는 만원 단위 연봉입니다. regionCodes는 GET /api/v1/student-codes/regions/grouped의 regions 안에 있는 code를 사용합니다. 평면 목록은 GET /api/v1/student-codes/regions에서도 조회할 수 있습니다. 지역은 기존 preferences.regionCodes와 같은 저장소를 공유하므로 어느 API로 변경해도 다른 조회에 반영됩니다. 다른 선호 항목과 성적·이력은 변경하지 않습니다. 저장과 지역 교체는 한 트랜잭션으로 처리합니다. 목표 저장만으로 진단·분석·로드맵을 생성하거나 온보딩을 자동 완료하지 않습니다. 로그인 세션과 PUT 요청의 CSRF 토큰이 필요합니다.";
    if(!get){op.getRequestBody().getContent().get("application/json").addExamples("취업 목표",new Example().summary("2027년 6월 취업 목표").value(Map.of("jobCategoryCode","84","companySizes",List.of("LARGE","MID"),"targetSalary",5000,"regionCodes",List.of("101000"),"targetCompany","네이버","targetDate","2027-06")));}
   }
   if(path.contains("/onboarding"))description+=" 화면의 학생 정보는 BASIC_INFO·MAJORS·COURSES에 대응하고, 목표 설정은 PREFERENCES에 대응합니다. 기본 정보·전공·성적과 취업 목표/선호를 각각 저장한 뒤 상태를 PATCH하세요. 이후 PROJECTS·INTERNSHIPS·AWARDS·CERTIFICATIONS는 입력 또는 SKIPPED로 처리합니다. 입력값 저장과 진행 상태 변경은 별도 요청입니다.";

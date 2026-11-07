@@ -8,9 +8,7 @@ const errors = {
   SESSION_EXPIRED: "세션이 만료됐습니다. 다시 로그인하세요.",
   CSRF_INVALID: "보안 토큰이 만료됐습니다. 버튼을 다시 눌러 요청하세요.",
   EMAIL_VERIFICATION_REQUIRED: "같은 브라우저에서 학교 이메일 인증을 완료한 뒤 가입하세요.",
-  EMAIL_DELIVERY_FAILED: "메일을 발송하지 못했습니다. 서버의 SMTP 설정을 확인하세요.",
-  STUDENT_NUMBER_EXISTS: "이미 등록된 학번입니다.",
-  STUDENT_NUMBER_IMMUTABLE: "최초 등록한 학번은 변경할 수 없습니다."
+  EMAIL_DELIVERY_FAILED: "메일을 발송하지 못했습니다. 서버의 SMTP 설정을 확인하세요."
 };
 function notice(message, error = false) {
   $("notice").textContent = message;
@@ -135,7 +133,6 @@ function setProfile(profile) {
     for (const form of document.querySelectorAll("[data-onboarding] form")) form.reset();
     renderOnboarding(null);
     clearTranscript();
-    $("goal-job-status").textContent = "";
   }
   state.profile = profile;
   $("student-fields").disabled = !profile;
@@ -290,8 +287,6 @@ function fillGoal(goal) {
   for (const checkbox of $("goal-form").elements.namedItem("companySizes"))
     checkbox.checked = goal.companySizes.includes(checkbox.value);
   setRegionSelection(goal.regionCodes || []);
-  $("goal-job-status").textContent = goal.jobCategoryCode == null
-    ? "이전 직무 분야 (" + goal.legacyJobField + ")의 공통 직무를 다시 선택하세요." : "";
 }
 click("goal-read", async () => {
   if (!state.catalogs) await readCatalogs();
@@ -301,7 +296,6 @@ click("goal-read", async () => {
   } catch (error) {
     if (error.status !== 404 || error.code !== "ITEM_NOT_FOUND") throw error;
     $("goal-form").reset();
-    $("goal-job-status").textContent = "";
     const preferences = await api.request("me/preferences");
     setRegionSelection(preferences.regionCodes);
     notice("아직 저장된 취업 목표가 없습니다. 목표를 입력하고 저장하세요.");

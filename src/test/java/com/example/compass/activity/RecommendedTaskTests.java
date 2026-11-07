@@ -23,7 +23,7 @@ class RecommendedTaskTests {
     @Autowired RecommendedTaskRepository tasks;
     @Autowired org.springframework.transaction.PlatformTransactionManager transactionManager;
     private void seed(){
-        em.createNativeQuery("INSERT INTO student(id,login_id,password_hash,school_email,name,is_transfer) VALUES(701,'task_user','hash','task@sju.ac.kr','학생',false)").executeUpdate();
+        em.createNativeQuery("INSERT INTO student(id,password_hash,school_email,name,is_transfer) VALUES(701,'hash','task@sju.ac.kr','학생',false)").executeUpdate();
         em.createNativeQuery("INSERT INTO company(id,name) VALUES(701,'company')").executeUpdate();
         em.createNativeQuery("INSERT INTO job_posting(source_code,source_posting_id,company_id,title,active) VALUES('SARAMIN','task',701,'posting',true)").executeUpdate();
         em.createNativeQuery("INSERT INTO posting_analysis(id,source_code,source_posting_id,input_hash,input_snapshot,status,started_at) VALUES(701,'SARAMIN','task','hash','{}','SUCCESS',CURRENT_TIMESTAMP)").executeUpdate();

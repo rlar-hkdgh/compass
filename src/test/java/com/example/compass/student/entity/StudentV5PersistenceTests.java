@@ -18,7 +18,7 @@ class StudentV5PersistenceTests {
     @Autowired StudentCertificationRepository certifications;
     @Autowired EntityManager em;
     private Student student() {
-        var s=new Student();s.setLoginId("v5_student");s.setPasswordHash("hash");s.setSchoolEmail("v5@sju.ac.kr");s.setName("student");s.setIsTransfer(false);return students.saveAndFlush(s);
+        var s=new Student();s.setPasswordHash("hash");s.setSchoolEmail("v5@sju.ac.kr");s.setName("student");s.setIsTransfer(false);return students.saveAndFlush(s);
     }
     private StudentInternship internship(Long studentId) {
         var i=new StudentInternship();i.setStudentId(studentId);i.setCompanyName("company");i.setJobCategoryCode("84");i.setStartedOn(LocalDate.of(2025,1,1));i.setEndedOn(LocalDate.of(2025,2,1));i.setDescription("work + outcome");return i;
