@@ -1,0 +1,907 @@
+<!doctype html>
+<html lang="ko">
+ <head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
+	<meta name="description" content="다양한 종목의 자격검정">
+	<meta name="keywords" content="자격검정, kait, 카이트">
+	<title>KAIT 자격검정</title>
+
+	
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+	<meta http-equiv="X-UA-Compatible" content="IE=11; IE=10; IE=EDGE">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	 
+
+ </head>
+ <body>
+	
+	<div class="wrap">
+		<div id="loadingWrap">
+			<div class="loading">
+				<img src="/common2/examHome/image/common/loading2.gif" alt="처리중입니다">
+			</div>
+		</div>
+		
+		<div id="skipToContent">
+			<a href="#contents">본문 바로가기</a>
+			<a href="#tm">대메뉴 바로가기</a>
+		</div>
+		
+		
+		<header class="header">
+			<div class="hd_wrap clearfix">
+				
+				<a href="main.do" class="logo"><img src="/common/images/common/kait_logo3.jpg" alt="메인로고 클릭시 메인으로 이동합니다"></a>
+				<div class="tnb">
+					 <a href="/">홈</a>
+					 
+					 	<a href="examlogin.do">로그인</a>
+					 	<a href="memjoin.do">회원가입</a>
+					 
+					 
+				</div>
+			</div>
+			<div class="navWrap" id="tm">
+				<nav class="gnb clearfix">
+					<span class="menu"><a href="introducesubject.do">자격안내</a></span>
+					<span class="menu"><a href="memacceptguide.do">시험접수</a></span>
+					<span class="menu"><a href="memgrade.do">합격발표</a></span>
+					<span class="menu"><a href="memapplylicense.do">자격증 발급</a></span>
+					<span class="menu"><a href="noticelist.do">고객지원</a></span>
+					<span class="menu"><a href="memmyacceptlist.do">마이페이지</a></span>
+				</nav>
+				<div class="subWrap clearfix">
+					<div class="subArea">
+						
+						<div class="sub sub01">
+							
+							<a href="introducesubject.do">자격안내</a>
+							<a href="guidecert.do">시험일정</a>
+							<a href="acceptnotice.do">응시자 유의사항</a>
+							
+							<a href="memapplicationcurrent.do">자격활용현황</a>
+							<a href="guidetextbook.do">교재안내</a>
+							<a href="abolision.do">폐지자격 안내</a>
+						</div>
+						
+						<div class="sub sub02">
+							<a href="memacceptguide.do">시험접수안내</a>
+							<a href="memaccept1.do">시험접수신청 </a>
+							<a href="memconfirm.do">시험접수현황 </a>
+							<a href="memsitecheck.do">시험장 확인 </a>
+							<a href="memprint.do">수험표 출력</a>
+							<a href="memrefund.do">연기 및 환불</a>
+						</div>
+						
+						<div class="sub sub03">
+							<a href="memgrade.do">성적확인</a>
+							<a href="guidequestion.do">문제공개</a>
+							<a href="memappeallist.do">이의신청</a>
+						</div>
+						
+						<div class="sub sub04">
+							
+							<a href="memapplylicense.do">자격증발급</a>
+							<a href="memconfirmationinfo.do">합격확인서발급</a>
+							<a href="memapplydiatskill.do">KAIT스킬인증/공인강사</a>
+
+						</div>
+						
+						<div class="sub sub05">
+							<a href="noticelist.do">공지사항</a>
+							<a href="questionlist.do">자주하는질문</a>
+							
+							<a href="onlinelecturelibrary4.do">온라인 강의교안</a>
+							
+							
+							<a href="guideheadquarter.do">지역본부안내</a>
+
+						</div>
+						
+						<div class="sub sub06">
+							<a href="memmyacceptlist.do">시험접수 현황</a>
+							<a href="memgetcertificatelist.do">자격취득 현황</a>
+							
+							<a href="memapplylicenselist.do">자격증발급 현황</a>
+							<a href="memapplydiatskilllist.do">KAIT스킬인증/공인강사 현황</a>
+							<a href="counselingcenterlist.do">1:1상담내역</a>
+							
+							
+							<a href="memphoto.do">사진관리</a>
+							<a href="exameditmyinfopwd.do">회원정보수정</a>
+							<a href="memwithdraw.do">회원탈퇴 </a>
+						</div>
+						
+					</div>
+				</div>
+			</div>
+
+			
+			
+
+			
+			<div class="m_header clearfix">
+				
+				<a href="/main.do" class="logo_m"><img src="/common/images/common/kait_logo3.jpg" alt="메인로고 클릭시 메인으로 이동합니다"></a>
+				
+				<span class="toggle_open"><img src="/common/images/common/toggle_open.png" alt="모바일 메뉴 열기"></span>
+				
+				<div class="logoinLink clearfix">
+					
+						<a href="examlogin.do"><img src="/common/images/main/topicon01.png">로그인</a>
+						<a href="memjoin.do"><img src="/common/images/main/topicon02.png">회원가입</a>
+					
+					
+				</div>
+			</div>
+			<div class="mobile_menu">
+				<div class="m_tnb clearfix">
+					<a href="/main.do" class="goToHome"><img src="/common/images/common/m_home.png" alt="메인으로 이동합니다"></a>
+					<span class="toggle_close"><img src="/common/images/common/toggle_close.png" alt="모바일 메뉴 닫기"></span>
+				</div>
+				
+				<div class="mobile_m mm02">
+					<div class="m_mTit">시험접수</div>
+					<div class="m_sub">
+						<a href="memacceptguide.do">시험접수안내</a>
+						<a href="memaccept1.do">시험접수신청 </a>
+						<a href="memconfirm.do">시험접수현황 </a>
+						<a href="memsitecheck.do">시험장 확인 </a>
+						<a href="memprint.do">수험표 출력</a>
+						<a href="memrefund.do">연기 및 환불</a>
+					</div>
+				</div>
+				<div class="mobile_m mm03">
+					<div class="m_mTit">자격안내</div>
+					<div class="m_sub">
+						<a href="introducesubject.do">자격안내</a>
+						<a href="introducesubject.do">종목안내</a>
+						<a href="guidecert.do">시험일정</a>
+						<a href="acceptnotice.do">응시자 유의사항</a>
+						
+						<a href="memapplicationcurrent.do">자격활용현황</a>
+						<a href="guidetextbook.do">교재안내</a>
+					</div>
+				</div>
+				<div class="mobile_m mm04">
+					<div class="m_mTit">합격발표</div>
+					<div class="m_sub">
+						<a href="memgrade.do">성적확인</a>
+						<a href="guidequestion.do">문제공개</a>
+						<a href="memappeallist.do">이의신청</a>
+					</div>
+				</div>
+				<div class="mobile_m mm05">
+					<div class="m_mTit">자격증발급</div>
+					<div class="m_sub">
+						<a href="memapplylicense.do">자격증발급</a>
+						<a href="memconfirmationinfo.do">합격확인서발급</a>
+						<a href="memapplydiatskill.do">KAIT스킬인증/공인강사</a>
+					</div>
+				</div>
+				<div class="mobile_m mm06">
+					<div class="m_mTit">고객지원</div>
+					<div class="m_sub">
+						<a href="noticelist.do">공지사항</a>
+						
+						<a href="abolision.do">폐지자격 안내</a>
+						<a href="questionlist.do">자주하는질문</a>
+						<a href="onlinelecturelibrary4.do">온라인 강의교안</a>
+						
+						<a href="guideheadquarter.do">지역본부안내</a>
+					</div>
+				</div>
+				
+				
+				
+					<div class="mobile_m mm08">
+						<div class="m_mTit">로그인</div>
+						<div class="m_sub">
+							<a href="examlogin.do">로그인</a>
+							<a href="memjoin.do">회원가입</a>
+							<a href="memfindid.do">아이디찾기</a>
+							<a href="memfindpwd.do">비밀번호찾기</a>
+						</div>
+					</div>
+				
+
+			</div>
+			<div class="dim"></div>
+			
+		</header>
+		
+
+	<div class="con_wrap">
+			<div class="con_layout clearfix">
+				
+
+
+
+			
+			<section class="lnb subBg01 mt_70">
+				<div class="lnbBor">
+				
+					
+					
+						<div class="lnbTop">
+							<span class="lnbTit">자격안내</span>
+							<p class="lnbText"><strong>공정하고 신뢰하는 KAIT</strong></p>
+							<p class="lnbText">AI·디지털기술자격검정은 <br> ICT자격분야의 가치를 전해드립니다.</p>
+						</div>
+						<div class="lnbList">
+							<ul>
+								
+								
+									
+										<li group="U01" id="U0130"><a href="introducesubject.do" class="on">자격안내<span class="lnbArrow"></span></a></li>
+									
+									
+								
+								
+									
+									
+										<li group="U01" id="U0140"><a href="guidecert.do">시험일정<span class="lnbArrow"></span></a></li>
+									
+								
+								
+									
+									
+										<li group="U01" id="U0170"><a href="acceptnotice.do">응시자 유의사항<span class="lnbArrow"></span></a></li>
+									
+								
+								
+								
+								
+									
+									
+										<li group="U04" id="U0450"><a href="memapplicationcurrent.do">자격활용현황<span class="lnbArrow"></span></a></li>
+									
+								
+								
+									
+									
+										<li group="U04" id="U0470"><a href="guidetextbook.do">교재안내<span class="lnbArrow"></span></a></li>
+									
+								
+								
+									
+									
+										<li group="U04" id="U0480"><a href="abolision.do">폐지자격 안내<span class="lnbArrow"></span></a></li>
+									
+								
+							</ul>
+						</div>
+	                
+					
+					
+					
+					
+					
+					
+					
+					
+					
+					
+
+
+					
+
+
+
+					
+					
+
+
+					
+				
+				</div>
+			</section>
+			
+
+			
+			<section class="contents clearfix mt_70" id="contents">
+				
+				<div class="pageNaviWrap clearfix">
+					<h1 class="pageTitle">자격안내</h1>
+					<div class="pageNavi">
+						<span class="pagePath pageP01"><img src="/common2/images/common/sub_home.jpg" alt="홈"></span>
+						
+						<span class="pagePath pageP03">자격안내</span>
+					</div>
+				</div>
+				
+				
+				<div class="field_wrap">
+					
+
+
+
+
+<div class="linkBox clearfix">
+	<a href="introducesubject.do" class="">디지털정보활용능력</a>
+	<a href="introducesubject1.do" class="on">리눅스마스터</a>
+	
+	
+	<a href="introducesubject5.do" class="">검색광고마케터</a>
+	
+	
+	
+	<a href="introducesubject10.do" class="">SNS광고마케터</a>
+	<a href="introducesubject8.do" class="">코딩활용능력</a>
+	<a href="introducesubject11.do" class="">AI활용능력</a>
+	
+</div>
+<div class="fieldPL15"><h2 class="field_title02 mt_20 mb_35"><img src="/common/images/sub/bi_linux.png" alt="리눅스마스터"> <a href="memaccept1.do" class="btnSt03">시험접수</a></h2></div>
+					
+					<form method="post" id="frm" name="frm">
+						
+						<div class="tabBtn">
+							<a href="#tab01" class="on">종목소개</a>
+							<a href="#tab02">시험내용</a>
+							<a href="#tab03">응시지역 및 수수료</a>
+							<a href="#">문제공개</a>
+							<a href="#tab04">자격활용사례</a>
+							<a href="#tab05">교육협력기관</a>
+							<a href="#">시험일정</a>
+						</div>
+					</form>
+					
+					<div class="tabBox" id="tab01">
+						<div class="fieldPL40 muchPadding">
+
+							<div class="pType01 bdBox mb_40">
+								<span class="bold"><h3 class="field_subTit mb_15"> AI·디지털기술자격검정</h3></span>
+								AI·디지털기술자격검정(KAIT-CP)은 방송통신발전기본법에 근거해서 설립한 한국정보통신진흥협회(KAIT)에서 운영하는 자격제도로서 ICT분야별로 기본적인 소양부터 전문기술까지 인적자원의 개발 및 평가를 통해 실생활과 산업현장에서 필요한 공정하고 신뢰할 수 있는 ICT분야 자격검정의 가치를 확고히 다져나아가겠습니다.
+							</div>
+							
+							<h3 class="field_subTit mb_15">리눅스마스터 (Linux Master)</h3>
+							<p class="fieldPL20 pType01">
+								<span class="listStyle01">리눅스로 운영되는 전세계 80%이상의 스마트폰, 70%이상의 클라우드 서버, 세계 상위의 500대 슈퍼컴퓨터를 비롯해서 5세대 이동통신(5G), 사물인터넷(IoT), 드론, 자율주행차 등 미래성장동력 분야에서 다양한 응용기반기술에 토대가 되는 자격종목</span><br>
+								<span class="listStyle01">리눅스 기반 시스템의 관리능력을 평가하는 1급 자격과 리눅스 운영시스템의 프로그램 사용능력을 평가하는 2급 자격으로 구분</span><br>
+								<span class="listStyle01">리눅스마스터 1, 2급은 NCS(국가직무능력표준) 등을 바탕으로 SW기술자의 체계적 역량 가이드라인 ITSQF(IT분야역량체계)의 IT시스템관리자(L5, L3)로 인정</span>
+							</p>
+							<h3 class="field_subTit mt_40 mb_15">필요성</h3>
+							<p class="fieldPL20 pType01">
+								<span class="listStyle01">리눅스 시스템 관리자에게 요구되는 리눅스 OS의 기본 지식 및 리눅스 기반의 서버 ·네트워크 관리 실무능력 인증</span><br>
+								<span class="listStyle01">리눅스 기반의 Desktop 활용 및 서버운영, 시스템의 설계개발 및 관리, 네트워크 구축 및 서비스 운영 등</span>
+							</p>
+							<h3 class="field_subTit mt_40 mb_15">자격종류</h3>
+							<p class="fieldPL20 pType01">
+								<span class="listStyle01">자격구분 : 국가공인자격</span><br>
+								<span class="listStyle01">등록번호 : 2008-0268</span><br>
+								<span class="listStyle01">공인번호 : 과학기술정보통신부 제2022-02호</span>
+							</p>
+							<h3 class="field_subTit mt_40 mb_15">시험과목</h3>
+							<div class="table_wrap">
+								<table>
+									<caption>시험과목</caption>
+									<colgroup>
+										<col>
+										<col>
+										<col>
+										<col>
+										<col>
+										<col>
+										<col>
+									</colgroup>
+									<thead>
+										<tr>
+											<th scope="col">검정과목</th>
+											<th scope="col">차수</th>
+											<th scope="col">검정방법</th>
+											<th scope="col">문항수</th>
+
+											<th scope="col">시험시간</th>
+											<th scope="col">배점</th>
+											<th scope="col">합격기준</th>
+										</tr>
+									</thead>
+									<tbody>
+										<tr>
+											<th scope="row" rowspan="3">1급</th>
+											<td scope="row">1차</td>
+											<td scope="row">필기 <br>(사지선다)</td>
+											<td scope="row">100문항</td>
+											<td scope="row">100분</td>
+											<td scope="row">100점</td>
+											<td scope="row">60점 이상 <br>(과목당 40% 미만 과락)</td>
+										</tr>
+										<tr>
+											<td scope="row" rowspan="2">2차</td>
+											<td scope="row">필기 (40%) <br>(단답,서술식)</td>
+											<td scope="row">10문항</td>
+											<td scope="row" rowspan="2">100분</td>
+											<td scope="row" rowspan="2">100점</td>
+											<td scope="row" rowspan="2">60점 이상</td>
+										</tr>
+										<tr>
+											<td scope="row">실기 (60%) <br>(작업식)</td>
+											<td scope="row">5~7문항</td>
+											
+										</tr>
+										<tr>
+											<th scope="row" rowspan="3">2급</th>
+											<td scope="row">1차</td>
+											<td scope="row">온라인시험 <br>(객관식 사지선다)</td>
+											<td scope="row">50문항</td>
+											<td scope="row">60분</td>
+											<td scope="row">100점</td>
+											<td scope="row">60점 이상</td>
+										</tr>
+										<tr>
+											<td scope="row">2차</td>
+											<td scope="row">필기 <br>(사지선다)</td>
+											<td scope="row">80문항</td>
+											<td scope="row">100분</td>
+											<td scope="row">100점</td>
+											<td scope="row">60점 이상 <br>(과목당 40% 미만 과락)</td>
+										</tr>
+									</tbody>
+								</table>
+							</div>
+							
+							<p class="pType01 field_aw02 mt_40 mb_10">시험출제 리눅스버전 안내</p>
+							<div class="grayBox">
+								<p class="pType01 fieldPL20">
+									<strong>•필기 : 커널 4.x이상</strong><br>
+									※ 레드햇 계열 : RHEL/Rocky Linux 8, 데비안 계열: ubuntu 18.04 이상<br>
+									<br>
+									<strong>•실기 : Rocky Linux 8.8 (VirtualBox를 활용하여 리눅스 구동)</strong>
+								</p>
+							</div>
+							
+							<h3 class="field_subTit mt_40 mb_15">응시자격</h3>
+							<div class="table_wrap">
+								<table>
+									<caption>응시자격</caption>
+									<colgroup>
+										<col>
+									</colgroup>
+									<tbody>
+										<tr>
+											
+											<td scope="row" class="textL">1차 : 제한없음<br>
+											2차 : 1차 시험 합격자에 한해 성적공개일 기준으로 2년이내 응시   
+											</td>
+										</tr>
+									</tbody>
+								</table>
+							</div>
+							
+						</div>
+					</div>
+					<div class="tabBox" id="tab02">
+						<div class="fieldPL40 muchPadding">
+
+							<h3 class="field_subTit mb_15">출제기준</h3>
+							<div class="table_wrap">
+								<table>
+									<caption>출제기준</caption>
+									<colgroup>
+										<col>
+										<col>
+										<col>
+										<col>
+									</colgroup>
+									<thead>
+										<tr>
+											<th scope="col">등급</th>
+											<th scope="col">과목</th>
+											<th scope="col">검정항목</th>
+											<th scope="col">검정내용</th>
+										</tr>
+									</thead>
+									<tbody>
+										<tr>
+											<th scope="row" rowspan="10">1급</th>
+											<td scope="row" rowspan="3">리눅스 실무의 이해</td>
+											<td scope="row" class="textL">리눅스의 개요</td>
+											<td scope="row" class="textL">운영체제의 개요, 리눅스 기초</td>
+										</tr>
+										<tr>
+											<td scope="row" class="textL">리눅스 시스템의 이해</td>
+											<td scope="row" class="textL">리눅스와 하드웨어, 리눅스의 구조, X 윈도, SHELL, 프로세스</td>
+										</tr>
+										<tr>
+											<td scope="row" class="textL">네트워크의 이해</td>
+											<td scope="row" class="textL">네트워크 기초 및 설정</td>
+										</tr>
+										<tr>
+											<td scope="row" rowspan="4">리눅스 시스템 관리</td>
+											<td scope="row" class="textL">일반 운영관리</td>
+											<td scope="row" class="textL">사용자·파일 시스템·프로세스·S/W 설치 및 관리</td>
+										</tr>
+										<tr>
+											<td scope="row" class="textL">장치 관리</td>
+											<td scope="row" class="textL">장치의 설치 및 관리, 주변장치 관리</td>
+										</tr>
+										<tr>
+											<td scope="row" class="textL" rowspan="2">시스템 보안 및 관리</td>
+											<td scope="row" class="textL">시스템 분석, 시스템 보안 및 관리</td>
+										</tr>
+										<tr>
+											<td scope="row" class="textL">시스템 백업</td>
+										</tr>
+										<tr>
+											<td scope="row" rowspan="3">네트워크 및 서비스의 활용</td>
+											<td scope="row" class="textL">네트워크 서비스</td>
+											<td scope="row" class="textL">웹·인증·파일·메일·DNS관리(설치 및 설정), 가상화 관리 및 기타 서비스</td>
+										</tr>
+										<tr>
+											<td scope="row" class="textL" rowspan="2">네트워크 보안</td>
+											<td scope="row" class="textL">네트워크 침해 유형 및 특징</td>
+										</tr>
+										<tr>
+											<td scope="row" class="textL">대비 및 대처 방안</td>
+										</tr>
+										<tr>
+											<th scope="row" rowspan="12">2급</th>
+											<td scope="row" rowspan="3">리눅스 일반</td>
+											<td scope="row" class="textL">리눅스의 이해</td>
+											<td scope="row" class="textL">리눅스의 개요, 역사, 철학</td>
+										</tr>
+										<tr>
+											<td scope="row" class="textL">리눅스 설치</td>
+											<td scope="row" class="textL">기본 설치 및 유형, 파티션과 파일 시스템, Boot Manager</td>
+										</tr>
+										<tr>
+											<td scope="row" class="textL">기본 명령어</td>
+											<td scope="row" class="textL">사용자 생성 및 계정 관리, 디렉터리 및 파일, 기타 명령어</td>
+										</tr>
+										<tr>
+											<td scope="row" rowspan="6">리눅스 운영 및 관리</td>
+											<td scope="row" class="textL">파일 시스템 관련 명령어</td>
+											<td scope="row" class="textL">권한 및 그룹 설정, 파일 시스템의 관리</td>
+										</tr>
+										<tr>
+											<td scope="row" class="textL">Shell</td>
+											<td scope="row" class="textL">개념 및 종류, 환경 설정</td>
+										</tr>
+										<tr>
+											<td scope="row" class="textL">프로세스 관리</td>
+											<td scope="row" class="textL">개념 및 유형, 프로세스 Utility</td>
+										</tr>
+										<tr>
+											<td scope="row" class="textL">에디터</td>
+											<td scope="row" class="textL">에디터의 종류, 에디터 활용</td>
+										</tr>
+										<tr>
+											<td scope="row" class="textL">소프트웨어 설치</td>
+											<td scope="row" class="textL">개념 및 사용법, 소프트웨어 설치 및 삭제</td>
+										</tr>
+										<tr>
+											<td scope="row" class="textL">장치 설정</td>
+											<td scope="row" class="textL">주변장치 연결 및 설정, 주변장치 활용</td>
+										</tr>
+										<tr>
+											<td scope="row" rowspan="3">리눅스 활용</td>
+											<td scope="row" class="textL">X 윈도</td>
+											<td scope="row" class="textL">개념 및 사용법, X 윈도 활용</td>
+										</tr>
+										<tr>
+											<td scope="row" class="textL">인터넷 활용</td>
+											<td scope="row" class="textL">네트워크의 개념, 인터넷 서비스의 종류, 인터넷 서비스의 설정</td>
+										</tr>
+										<tr>
+											<td scope="row" class="textL">응용분야</td>
+											<td scope="row" class="textL">기술동향, 활용기술</td>
+										</tr>
+									</tbody>
+								</table>
+							</div>
+							
+						</div>
+					</div>
+					<div class="tabBox" id="tab03">
+						<div class="fieldPL40 muchPadding">
+
+							<h3 class="field_subTit mb_15">응시지역 및 비용</h3>
+							<div class="table_wrap">
+								<table>
+									<caption>응시지역 및 비용</caption>
+									<colgroup>
+										<col>
+										<col>
+										<col>
+										<col>
+										<col>
+									</colgroup>
+									<thead>
+										<tr>
+											<th scope="col">등급</th>
+											<th scope="col">차수</th>
+											<th scope="col">검정수수료</th>
+											<th scope="col">응시지역</th>
+											<th scope="col">응시자격</th>
+										</tr>
+									</thead>
+									<tbody>
+										<tr>
+											<th scope="row" rowspan="2">1급</th>
+											<td scope="row">1차</td>
+											<td scope="row">55,000원</td>
+											<td scope="row" class="textL" rowspan="2">서울, 부산, 대구, 광주, 대전, 인천, 수원, 제주(8개시)</td>
+											<td scope="row" class="textL" rowspan="4">
+												1차 : 제한없음<br>
+												2차 : 1차 시험 합격자에 한해 <br>
+												       성적공개일 기준으로 2년 <br>
+												       이내 응시
+											</td>
+										</tr>
+										<tr>
+											<td scope="row">2차</td>
+											<td scope="row">77,000원</td>
+										</tr>
+										<tr>
+											<th scope="row" rowspan="2">2급</th>
+											<td scope="row">1차</td>
+											<td scope="row">22,000원</td>
+											<td scope="row" class="textL">On-line 접속 가능한 모든 지역</td>
+										</tr>
+										<tr>
+											<td scope="row">2차</td>
+											<td scope="row">44,000원</td>
+											<td scope="row" class="textL">서울, 부산, 대구, 광주, 대전, 인천, 수원, 제주(8개시)</td>
+										</tr>
+									</tbody>
+								</table>
+							</div>
+							<li class="mb_35">※ 2022년도 시행되는 시험부터 적용</li>
+							
+							<ol class="olist fieldPL20 mt_25">
+								<li class="mb_35">응시지역은 운영상황에 따라 변경될 수 있음</li>
+								<li class="mb_35">자격증 발급수수료 : 6,300원(배송료 포함)<br>
+									* 정보이용료 별도: 신용카드/계좌이체 650원, 가상계좌입금 300원
+								</li>
+								<li>
+									연기 및 환불 규정<br>
+									- 접수기간~시험 당일10일전 : 신청서 제출시 연기 또는 응시비용 전액환불<br>
+									- 시험일 9일전 ~ 시험 당일  : 신청서 및 규정된 사유의 증빙서류 제출시 연기 및 응시비용 전액 환불<br>
+									- 시험일 이후  : 환불 불가<br>
+									<span class="pointGn">※ 온라인 1차 시험의 경우 응시 접속이력이 없을 경우 접수 기간내에만 환불만 신청 가능</span>
+								</li>
+							</ol>
+						</div>
+					</div>
+				</div>
+				
+				<div class="tabBox" id="tab04">
+					<div class="fieldPL40 muchPadding">
+						<h2 class="field_title01 mt_40 mb_35">자격활용현황</h2>
+						<div class="table_wrap">
+							<table>
+								<caption>학점은행제 인정</caption>
+								<colgroup>
+									<col>
+									<col>
+									<col>
+								</colgroup>
+								<thead>
+									<tr>
+										<th scope="col">구분</th>
+										<th scope="col">내용</th>
+										<th scope="col">관련근거</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr>
+										<td scope="row">학점은행제 인정</td>
+										<td scope="row">1급 : 14학점, 2급 : 5학점 인정(일반선택)</td>
+										<td scope="row">학점인정 등에 관한 법률 제7조</td>
+									</tr>
+									<tr>
+										<td scope="row">고등학생 재학 중 취득 학교생활기록부 기재 인정</td>
+										<td scope="row">1급, 2급</td>
+										<td scope="row">초ㆍ중등교육법 제25조</td>
+									</tr>
+									<tr>
+										<td scope="row">현역병 군지원(모병)<br>대상자 복무선정</td>
+										<td scope="row">1급, 2급</td>
+										<td scope="row">병무청 군지원(모병)안내</td>
+									</tr>
+									<tr>
+										<td scope="row">육군 학군부사관 모집 가점</td>
+										<td scope="row">1급</td>
+										<td scope="row">육군본부 학군부사관 모집공고</td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+						
+						<h2 class="field_title01 mt_40 mb_35">자격활용처</h2>
+							<div class="table_wrap">
+							<table>
+								<caption>자격활용처</caption>
+								<colgroup>
+									<col>
+									<col>
+								</colgroup>
+								<thead>
+									<tr>
+										<th scope="col">내용</th>
+										<th scope="col">활용처</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr>
+										<td scope="row">인사 고과 반영</td>
+										<td scope="row" class="textL">
+											㈜KT, 농협경제지주, 농협금융지주, 농협생명, 농협은행, 농협중앙회, 농협하나로유통, 네트웍오앤에스㈜, 신한데이터시스템, 
+											에스큐브아이, 에프아이에스시스템㈜, ㈜애드캡슐소프트, ㈜엘에스씨시스템즈, 위니텍, <br>㈜파인원커뮤니케이션즈
+										</td>
+									</tr>
+									<tr>
+										<td scope="row">졸업 인증</td>
+										<td scope="row" class="textL">
+											경동대학교, 공주대학교, 광안대학교, 국제대학교, 동덕여자대학교, 동서울대학교, 명지대학교, 방송통신대학교, 수원대학교, 숙명여자대학교, 유원대학교, 전북대학교, 중부대학교
+										</td>
+									</tr>
+									<tr>
+										<td scope="row">취득 시 장학금 지급</td>
+										<td scope="row" class="textL">
+											가천대학교, 경기과학기술대학교, 경기대학교, 경민대학교, 김포대학교, 동덕여자대학교, 동원대학교, 부천대학교, 상지대학교, 성결대학교, 중부대학교
+										</td>
+									</tr>
+									<tr>
+										<td scope="row">학점 인정</td>
+										<td scope="row" class="textL">
+											건국대학교, 경동대학교, 경인대학교, 광안대학교, 동서울대학교, 동양미래대학교, 명지대학교, 목포대학교, 상명대학교, 서강대학교, 서일대학교, 
+											성균관대학교, 세명대학교, 세종대학교, 순천대학교, 신안산대학교, 유원대학교, 인덕대학교, 중앙직업전문학교
+										</td>
+									</tr>
+									<tr>
+										<td scope="row">직무교육 대체</td>
+										<td scope="row" class="textL">
+											㈜디케이테크인, ㈜에이텍티앤, 에프아이에스시스템㈜, 성우전자㈜, ㈜윈스, ㈜케이아이엔엑스, ㈜티시스, 한기술
+										</td>
+									</tr>
+									<tr>
+										<td scope="row">채용 우대</td>
+										<td scope="row" class="textL">
+											GS네오텍(주), ㈜KT, KTDS, SH수협은행, (주)가온테크, ㈜경신, (주)고고팩토리, 국가기상위성센터, 국민건강보험공단, 군인공제회C&amp;C, (주)기원테크, (주)네쓰론, 
+											주식회사넥스블루, (주)넷티스트, 농협경제지주, 농협금융지주, 농협생명, 농협은행, 농협중앙회, 농협하나로유통, (주)다드림아이앤에스, 다원데이터(주), 대구경북첨단의료산업진흥재단, 
+											주식회사대니스, ㈜더좋은생각, (주)델타시스템, (주)디지털대성, 로이드케이, 롯데캐피탈(주), (주)리안시스템, ㈜마음AI, (주)매사, 무역안보관리원, (주)백그라운드, ㈜백스포트, 
+											(주)본정보,<br> (재)부산인재개발원, (주)비상교육, (주)삼영에스앤씨, 서산시농업기술센터, (주)서전아이티, (주)세한알에프시스템,<br> (주)소만사, (주)솔루파인, 신용회복위원회, 아이비티에스(주), 
+											(주)아이티온넷, ㈜아테나컴퍼니, (주)아톤,<br> (주)알티넷솔루션, (주)앱이지, 앳지코퍼레이션주식회사, 에스씨지솔루션즈(주), (주)에스큐브아이, 에스피씨지,<br> (주)에이닷, (주)에이치씨인포, 
+											㈜엔에이치알커뮤니케이션즈, 주식회사 엘아이지아큐버, (주)엘에스씨스템즈,<br> (주)엠엘소프트, 연세IT미래교육원, 와이시큐어(주), 우리에프아이에스(주), 우리은행, ㈜웨슬리퀘스트,<br> (주)웰클라우드, 
+											위드인소프트, (주)윌비소프트, (주)유니와이드, (주)유더블유에스, 유앤파트너즈, (주)유호스트,<br> (주)이글루코퍼레이션, (주)이너인포, (주)이비아이앤씨, (주)이테크비전, 인사혁신처, 
+											(주)인성정보, (주)인스코리아, 인천공항시설관리㈜, 인트로맨, ㈜인하이브, 잡앤피플연구소, (주)장보고식자재마트, 전국지방의료원연합회, 전력거래소, 전쟁기념사업회, 전통건축수리기술진흥재단, 
+											제노솔루션(주), (주)제론소프트엔, 제이씨현시스템(주),<br> (주)제이원시스, (주)제타큐브, 중소기업기술정보진흥원, 중앙선거관리위원회, (주)지란지교소프트, 카카오뱅크,<br> (주)캐스트이즈, 
+											(주)케이디정보기술, 케이솔루션, ㈜케이아이미디어, (주)케이엑스넥스지, (주)케파스, (주)코넥,<br> (주)코아맥스테크놀로지, (주)코윈테크, (주)콘텐츠브릿지, (주)클라우드시스템, 타라소프트(주),<br> 
+											(주)트라이얼정보통신, ㈜트리피, (주)티앤디소프트, ㈜패스온, 한국과학기술평가원, 한국국방연구원, 한국노인인력개발원, 한국농수산식품유통공사, (주)한국디지털거래소, 한국모바일인증(주), 
+											㈜한국미래솔루션,<br> (주)한국비씨피솔루션즈, 한국사회능력개발원, 한국사회보장정보원, 한국수목원정원관리원, 한국인터넷진흥원,<br> (사)한국정보통신진흥협회, 한국조폐공사, 한국지역정보개발원, 
+											한국지역정보개발원, 한국특허기술진흥원, 한국해외인프라도시개발지원공사, 한시큐리티(주), (주)한울솔루션, 한전KDN㈜, (주)헤이즐시스, 현대에이치티(주)
+										</td>
+									</tr>
+									
+									
+								</tbody>
+							</table>
+						</div>
+					</div>
+				</div>
+				<div class="tabBox" id="tab05">
+					<div class="fieldPL40 muchPadding">
+						<div class="table_wrap">
+							<h2 class="field_title01 mt_40 mb_35">교육 협력기관</h2>
+							<table>
+								<caption>자격활용처</caption>
+								<colgroup>
+									<col>
+									<col>
+									<col>
+								</colgroup>
+								<thead>
+									<tr>
+										<th scope="col">기관명</th>
+										<th scope="col">주요 교육과목</th>
+										<th scope="col">연락처</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr>
+										<td scope="row">코드랩아카데미학원</td>
+										<td scope="row">리눅스마스터, AI활용능력</td>
+										<td scope="row">02-2038-0800</td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+					</div>
+				</div>
+			</section></div>
+						
+		
+		
+	</div>
+</div>
+
+
+		
+
+				
+		
+		<footer class="footer">
+			<div class="fWrap clearfix">
+				<a class="f_logo" href="http://www.kait.or.kr/"><img src="/common/images/common/footerLogo_260330.jpg" alt=" "></a>
+				<div class="f_con">
+					<div class="fnb">
+						<a href="emailextractionprevention.do">이메일추출방지</a>
+						<a href="guidepersionalinfomation.do"><b>개인정보처리방침</b></a>
+						<a href="guideservice.do">서비스이용약관</a>
+						<a href="guidemap.do">찾아오는길</a>
+					</div>
+					<p class="copyright">
+						(우) 06242 서울특별시 강남구 역삼로 111 (역삼동)<br>
+						운영책임자 : 장기영 <span class="fbar"></span> 사업자번호: 211-82-11990 <span class="fbar"></span> TEL: 1899-0628 <br> Copyright ⓒKorea Association for AI &amp; ICT promotion. All Right reserved.
+					</p>
+				</div>
+				
+				
+			</div>
+		</footer>
+		
+	
+ 	
+
+
+</body>
+
+</html>
+
+					
+					
+

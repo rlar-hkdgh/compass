@@ -1,1 +1,54 @@
-spring.application.name=compass
+spring:
+  config:
+    import: 'optional:file:./.env[.properties]'
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 6MB
+      file-size-threshold: 6MB
+  application:
+    name: compass
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/compass}
+    username: ${DB_USERNAME:compass}
+    password: ${DB_PASSWORD}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+  flyway:
+    enabled: ${FLYWAY_ENABLED:true}
+
+compass:
+  recruit:
+    import-enabled: false
+  docs:
+    enabled: ${API_DOCS_ENABLED:false}
+  demo:
+    enabled: ${DEMO_ENABLED:false}
+  mail:
+    enabled: ${MAIL_ENABLED:false}
+    host: ${SMTP_HOST:smtp.gmail.com}
+    port: ${SMTP_PORT:587}
+    username: ${SMTP_USERNAME:}
+    password: ${SMTP_PASSWORD:}
+    from: ${SMTP_FROM:}
+
+server:
+  servlet:
+    session:
+      timeout: 30m
+      tracking-modes: cookie
+      cookie:
+        http-only: true
+        secure: ${SESSION_COOKIE_SECURE:true}
+        same-site: ${SESSION_COOKIE_SAME_SITE:lax}
+
+springdoc:
+  override-with-generic-response: false
+  api-docs:
+    enabled: ${compass.docs.enabled:false}
+  swagger-ui:
+    enabled: ${compass.docs.enabled:false}
+    disable-swagger-default-url: true
+    with-credentials: true

@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Compass API 테스트</title>
+  <link rel="stylesheet" href="styles.css">
+  <script type="module" src="app.js"></script>
+</head>
+<body>
+<main>
+  <h1>Compass API 테스트</h1>
+  <p>학교 이메일 인증부터 학생 정보·전공, 취업 목표, 선택 이력 입력과 온보딩 완료까지 테스트합니다.</p>
+  <p><strong>버튼을 누르면 실제 연결된 DB에 저장되며, 인증 메일이 발송됩니다.</strong></p>
+  <p id="session-status">로그인 상태를 조회하거나 로그인하세요.</p>
+  <button type="button" id="session-read">현재 로그인 상태 조회</button>
+  <button type="button" id="logout" disabled>로그아웃</button>
+  <p id="notice" role="status" aria-live="polite"></p>
+
+  <section>
+    <h2>1. 학교 이메일 인증·회원가입</h2>
+    <form id="signup-form" method="post">
+      <label>학교 이메일 <input id="signup-email" name="schoolEmail" type="email" maxlength="254" autocomplete="email" required placeholder="본인 학교 이메일"></label>
+      <div class="actions">
+        <button type="button" id="email-check">이메일 중복 확인</button>
+        <button type="button" id="email-send" disabled>인증번호 발송</button>
+      </div>
+      <p id="email-status" aria-live="polite">이메일 중복 확인부터 진행하세요. 소문자 학교 이메일만 사용합니다.</p>
+      <label>인증번호 <input id="email-code" type="text" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" autocomplete="one-time-code" placeholder="6자리 숫자"></label>
+      <button type="button" id="email-confirm" disabled>인증번호 확인</button>
+      <label>이름 <input id="signup-name" name="name" maxlength="100" autocomplete="name" required></label>
+      <label>비밀번호 <input id="signup-password" name="password" type="password" minlength="10" maxlength="64" autocomplete="new-password" required></label>
+      <small>10~64자, UTF-8 72바이트 이하. 인증 완료 후 10분 안에 가입하세요.</small>
+      <label class="check"><input id="signup-transfer" type="checkbox"> 편입생입니다</label>
+      <button type="submit" id="signup-submit" disabled>회원가입</button>
+    </form>
+  </section>
+
+  <section>
+    <h2>2. 로그인</h2>
+    <form id="login-form" method="post">
+      <label>학교 이메일 <input id="login-email" name="schoolEmail" type="email" maxlength="254" autocomplete="username" required></label>
+      <label>비밀번호 <input id="login-password" name="password" type="password" maxlength="64" autocomplete="current-password" required></label>
+      <button type="submit">로그인</button>
+    </form>
+  </section>
+
+  <fieldset id="student-fields" disabled>
+    <legend>3. 학생 기본 정보</legend>
+    <button type="button" id="profile-read">저장된 학생 정보 조회</button>
+    <form id="profile-form" method="post">
+      <label>이름 <input id="profile-name" name="name" maxlength="100" required></label>
+      <p id="profile-semester">저장된 이수학기 없음</p>
+      <p id="profile-gpa">저장된 평점 없음</p>
+      <label class="check"><input id="profile-transfer" type="checkbox"> 편입생입니다</label>
+      <fieldset id="major-fields">
+        <legend>전공 선택</legend>
+        <button type="button" id="catalog-read">입력 항목 코드 다시 조회</button>
+        <button type="button" id="majors-read">저장된 전공 다시 조회</button>
+        <p id="majors-status" aria-live="polite"></p>
+        <div id="major-rows"></div>
+        <button type="button" id="major-add">전공 항목 추가</button>
+        <small>전공을 하나 이상 선택하세요. 주전공·복수전공·부전공은 각각 추가할 수 있습니다.</small>
+      </fieldset>
+      <fieldset id="transcript-fields">
+        <legend>기이수 성적표</legend>
+        <label>성적표 파일 <input id="transcript-file" type="file" accept=".xlsx"></label>
+        <small>최대 5MiB. 파일을 올린 경우 미리보기로 확인한 뒤 다음을 누르세요.</small>
+        <button type="button" id="transcript-preview">성적표 미리보기</button>
+        <p id="transcript-summary" aria-live="polite"></p>
+        <div class="transcript-table">
+          <table id="transcript-courses" hidden>
+            <caption>성적표 과목 내역</caption>
+            <thead><tr><th scope="col">원본 행</th><th scope="col">수강 학기</th><th scope="col">학수번호</th><th scope="col">과목명</th><th scope="col">등급</th></tr></thead>
+            <tbody id="transcript-course-list"></tbody>
+          </table>
+        </div>
+        <ul id="transcript-rows" aria-live="polite"></ul>
+      </fieldset>
+      <button type="submit" id="profile-save">다음</button>
+    </form>
+    <button type="button" id="courses-read">저장된 수강 과목 조회</button>
+    <button type="button" id="courses-continue">저장 기록으로 완료 / 없으면 건너뛰기</button>
+    <details>
+      <summary>수강 과목 직접 입력</summary>
+      <form id="courses-form" method="post">
+        <label>학수번호 <input name="courseNumber" maxlength="32" required></label>
+        <label>과목명 <input name="courseName" maxlength="255" required></label>
+        <label>수강 연도 <input name="academicYear" type="number" min="1900" max="2100" required></label>
+        <label>수강 학기 <select name="semester"><option value="1학기">1학기</option><option value="2학기">2학기</option><option value="여름학기">여름학기</option><option value="겨울학기">겨울학기</option></select></label>
+        <label>등급 <select name="grade"><option>A+</option><option>A0</option><option>B+</option><option>B0</option><option>C+</option><option>C0</option><option>D+</option><option>D0</option><option>F</option><option>FA</option><option>P</option><option>NP</option></select></label>
+        <button type="submit">수강 과목 추가</button>
+      </form>
+    </details>
+  </fieldset>
+
+  <fieldset id="goal-fields" disabled>
+    <legend>4. 취업 목표</legend>
+    <button type="button" id="goal-read">저장된 취업 목표 조회</button>
+    <form id="goal-form" method="post">
+      <label>희망 직무 분야 <select id="goal-job" required></select></label>
+      <p id="goal-job-status" aria-live="polite"></p>
+      <div role="group" aria-labelledby="company-sizes-label">
+        <p id="company-sizes-label">기업 규모 (복수 선택)</p>
+        <label class="check"><input type="checkbox" name="companySizes" value="LARGE"> 대기업</label>
+        <label class="check"><input type="checkbox" name="companySizes" value="MID"> 중견기업</label>
+        <label class="check"><input type="checkbox" name="companySizes" value="STARTUP"> 스타트업</label>
+        <label class="check"><input type="checkbox" name="companySizes" value="SMALL"> 중소기업</label>
+      </div>
+      <label>목표 연봉 (만원) <input id="target-salary" type="number" min="0" step="1" placeholder="5000" required></label>
+      <p id="regions-label">희망 지역 (복수 선택)</p>
+      <div id="regions" class="region-picker" role="group" aria-labelledby="regions-label">
+        <div id="region-groups" aria-label="상위 지역" role="group"></div>
+        <div id="region-options"></div>
+      </div>
+      <p id="region-selection" aria-live="polite">선택된 지역 없음</p>
+      <button id="region-clear" type="button">지역 초기화</button>
+      <small>왼쪽에서 상위 지역을 고르고 세부 지역을 하나 이상 체크하세요.</small>
+      <label>목표 회사명 <input id="target-company" maxlength="255" required placeholder="회사명을 직접 입력"></label>
+      <label>취업 목표 연월 <input id="target-date" type="month" min="1900-01" max="2100-12" required></label>
+      <button type="submit">취업 목표 전체 저장</button>
+    </form>
+  </fieldset>
+
+  <fieldset id="projects-fields" data-onboarding disabled>
+    <legend>5. 프로젝트</legend>
+    <button type="button" id="projects-read">저장된 프로젝트 조회</button>
+    <button type="button" id="projects-continue">저장 기록으로 완료 / 없으면 건너뛰기</button>
+    <form id="projects-form" method="post">
+      <label>프로젝트명 <input name="name" maxlength="255" required></label>
+      <label>개요 <textarea name="overview" maxlength="50000" required></textarea></label>
+      <label>본인 역할·수행 내용 <textarea name="description" maxlength="50000" required></textarea></label>
+      <label>성과 <textarea name="outcome" maxlength="50000"></textarea></label>
+      <label>GitHub 주소 <input name="githubUrl" type="url" maxlength="2000"></label>
+      <label>기술 스택 (복수 선택) <select name="techStackCodes" id="project-stacks" multiple size="5"></select></label>
+      <button type="submit">프로젝트 추가</button>
+    </form>
+  </fieldset>
+
+  <fieldset id="internships-fields" data-onboarding disabled>
+    <legend>6. 인턴</legend>
+    <button type="button" id="internships-read">저장된 인턴 조회</button>
+    <button type="button" id="internships-continue">저장 기록으로 완료 / 없으면 건너뛰기</button>
+    <form id="internships-form" method="post">
+      <label>회사명 <input name="companyName" maxlength="255" required></label>
+      <label>직무 <select name="jobCategoryCode" id="internship-job" required></select></label>
+      <label>시작일 <input name="startedOn" type="date" required></label>
+      <label>종료일 <input name="endedOn" type="date" required></label>
+      <label>업무 내용 <textarea name="description" maxlength="50000" required></textarea></label>
+      <button type="submit">인턴 추가</button>
+    </form>
+  </fieldset>
+
+  <fieldset id="awards-fields" data-onboarding disabled>
+    <legend>7. 수상</legend>
+    <button type="button" id="awards-read">저장된 수상 조회</button>
+    <button type="button" id="awards-continue">저장 기록으로 완료 / 없으면 건너뛰기</button>
+    <form id="awards-form" method="post">
+      <label>수상명 <input name="name" maxlength="255" required></label>
+      <label>주최기관 <input name="organizer" maxlength="255" required></label>
+      <label>설명 <textarea name="description" maxlength="50000"></textarea></label>
+      <button type="submit">수상 추가</button>
+    </form>
+  </fieldset>
+
+  <fieldset id="certifications-fields" data-onboarding disabled>
+    <legend>8. 자격증</legend>
+    <button type="button" id="certifications-read">저장된 자격증 조회</button>
+    <button type="button" id="certifications-continue">저장 기록으로 완료 / 없으면 건너뛰기</button>
+    <form id="certifications-form" method="post">
+      <p id="certification-codes-label">추가할 자격증 (복수 선택)</p>
+      <div id="certification-codes" class="code-choices" role="group" aria-labelledby="certification-codes-label"></div>
+      <button type="submit">자격증 추가</button>
+    </form>
+  </fieldset>
+
+  <fieldset id="onboarding-fields" data-onboarding disabled>
+    <legend>9. 온보딩 완료</legend>
+    <p id="onboarding-summary" aria-live="polite">로그인 후 진행 상태를 확인할 수 있습니다.</p>
+    <ul id="onboarding-steps"></ul>
+    <button type="button" id="onboarding-finish">온보딩 완료 확인</button>
+  </fieldset>
+
+  <section>
+    <h2>실행 결과</h2>
+    <p>비밀번호·인증번호·CSRF 토큰을 제외한 API 응답입니다. 요청 본문은 기록하지 않습니다.</p>
+    <pre id="response" aria-live="polite">아직 실행한 요청이 없습니다.</pre>
+    <details><summary>최근 요청 기록</summary><ol id="request-log"></ol></details>
+  </section>
+</main>
+</body>
+</html>

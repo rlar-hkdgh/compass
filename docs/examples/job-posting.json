@@ -1,0 +1,34 @@
+{
+  "companyId": 1,
+  "title": "백엔드 개발자 채용 - 저장 검증용 예시",
+  "sourceUrl": "https://www.saramin.co.kr/zf_user/jobs/relay/view?rec_idx=12345678",
+  "active": true,
+  "applicationStartAt": "2026-10-31T00:00:00Z",
+  "applicationEndAt": "2026-11-30T14:59:00Z",
+  "keywords": "Java,Spring Boot,SQL",
+  "description": "지원자격: Java 개발 경험. 우대사항: PostgreSQL 사용 경험. 실제 공고가 아닌 검증용 예시입니다.",
+  "codes": {
+    "regions": [
+      "101070"
+    ],
+    "jobCategories": [
+      "84"
+    ],
+    "educationLevel": "8",
+    "deadlineType": "1",
+    "experienceType": "3",
+    "specialties": [],
+    "techStacks": [
+      "235",
+      "293"
+    ],
+    "employmentTypes": [
+      "1"
+    ],
+    "salaryUnit": "ANNUAL",
+    "salaryDecision": "DISCLOSED"
+  },
+  "salaryMinAmount": 35000000,
+  "salaryMaxAmount": 35000000,
+  "educationNote": "예정자 가능"
+}

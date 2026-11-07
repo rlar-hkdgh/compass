@@ -1,0 +1,23 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://aws-0-ap-northeast-2.pooler.supabase.com:5432/postgres?sslmode=require
+    username: postgres.rqecthphhcvmnvxrbubg
+    password: ${SUPABASE_DB_PASSWORD}
+    hikari:
+      maximum-pool-size: 3
+      minimum-idle: 0
+  jpa:
+    hibernate:
+      ddl-auto: validate
+  flyway:
+    enabled: ${FLYWAY_ENABLED:true}
+    clean-disabled: true
+
+server:
+  address: 127.0.0.1
+
+compass:
+  recruit:
+    import-enabled: false
+    crawl:
+      enabled: false

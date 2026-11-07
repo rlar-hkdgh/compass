@@ -1,0 +1,11 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="CompassApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
+    <module name="compass.main" />
+    <option name="SPRING_BOOT_MAIN_CLASS" value="com.example.compass.CompassApplication" />
+    <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+    <option name="PROGRAM_PARAMETERS" value="--spring.profiles.active=supabase --spring.flyway.enabled=false --spring.jpa.hibernate.ddl-auto=validate --compass.recruit.import-enabled=false --compass.recruit.crawl.enabled=false --compass.activity.collect.enabled=false --compass.demo.enabled=true" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>
