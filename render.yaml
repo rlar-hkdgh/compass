@@ -1,0 +1,30 @@
+services:
+  - type: web
+    name: compass-dev
+    runtime: docker
+    plan: free
+    region: singapore
+    branch: dev
+    autoDeployTrigger: "off"
+    healthCheckPath: /v3/api-docs
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: supabase
+      - key: SUPABASE_DB_PASSWORD
+        sync: false
+      - key: API_DOCS_ENABLED
+        value: "true"
+      - key: MAIL_ENABLED
+        value: "false"
+      - key: FLYWAY_ENABLED
+        value: "false"
+      - key: COMPASS_RECRUIT_IMPORT_ENABLED
+        value: "false"
+      - key: COMPASS_RECRUIT_CRAWL_ENABLED
+        value: "false"
+      - key: COMPASS_ACTIVITY_COLLECT_ENABLED
+        value: "false"
+      - key: SESSION_COOKIE_SECURE
+        value: "true"
+      - key: SERVER_FORWARD_HEADERS_STRATEGY
+        value: framework

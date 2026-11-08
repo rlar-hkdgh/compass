@@ -1,0 +1,14 @@
+*
+!Dockerfile
+!gradlew
+!build.gradle
+!settings.gradle
+!gradle/
+!gradle/wrapper/
+!gradle/wrapper/**
+!src/
+!src/main/
+!src/main/**
+**/.env
+**/.env.*
+**/application-secret.yml
