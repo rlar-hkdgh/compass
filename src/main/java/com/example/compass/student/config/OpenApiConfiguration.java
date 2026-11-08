@@ -28,18 +28,26 @@ public class OpenApiConfiguration {
             2. Render의 Compass Swagger UI를 열고 그 계정의 `schoolEmail`과 비밀번호로 `POST /api/v1/auth/login`을 실행합니다. `GET /api/v1/me`에서 프로필과 `emailVerified: true`를 확인합니다.
             3. 같은 브라우저에서 아래 온보딩 흐름을 테스트합니다. 로그인 이후 학생 정보 입력과 저장에는 SMTP가 필요 없습니다.
 
-            ### 학교 이메일 인증과 로그인 (SMTP를 켠 환경)
-            신규 가입은 `POST /api/v1/auth/signup/email/availability` → `POST /api/v1/auth/signup/email/send` → `POST /api/v1/auth/signup/email/confirm` → `POST /api/v1/auth/signup` 순서로 진행합니다. 같은 브라우저 세션에서 이메일 인증을 마치고 10분 안에 가입하세요. 가입 증명은 한 번만 사용됩니다.
+            ### 화면별 회원가입·온보딩 흐름
 
-            가입 후 `POST /api/v1/auth/login`으로 로그인하고 `GET /api/v1/me`로 프로필을 확인합니다. 가입과 로그인에는 `schoolEmail`을 사용합니다. 로그인하면 세션 ID와 CSRF 토큰이 갱신됩니다.
+            | 화면 | 호출할 API | 다음 단계로 넘어가는 조건 |
+            | --- | --- | --- |
+            | 학교 이메일 중복 확인 | `POST /api/v1/auth/signup/email/availability` | `available: true`이면 인증번호를 발송합니다. |
+            | 인증번호 발송·확인 | `POST /api/v1/auth/signup/email/send` → `POST /api/v1/auth/signup/email/confirm` | 같은 브라우저 세션에서 번호 확인이 성공하면, 같은 이메일로 10분 안에 가입합니다. |
+            | 회원가입 | `POST /api/v1/auth/signup` | `201 Created`이면 로그인 화면으로 이동합니다. |
+            | 로그인·이어하기 | `POST /api/v1/auth/login` → `GET /api/v1/me` → `GET /api/v1/me/onboarding` | 로그인과 조회에 성공하면 `nextStep`으로 이동합니다. 신규 계정은 모든 단계가 `NOT_STARTED`입니다. |
+            | 학생 기본 정보·전공·성적표 | `GET /api/v1/me/majors`로 기존 전공을 불러옵니다. 첨부 시 `POST /api/v1/me/courses/import/preview`로 XLSX의 과목·평점·정규 이수학기를 확인합니다. 다음 버튼에서 `PATCH /api/v1/me` → `PUT /api/v1/me/majors` → 첨부한 경우 `POST /api/v1/me/courses/import/confirm-all`에 같은 세션의 `previewId`를 보냅니다. | 기본 정보·전공과 첨부한 성적표 저장이 모두 성공한 뒤, `BASIC_INFO`·`MAJORS`와 성적표를 처리한 경우 `COURSES`를 `COMPLETED`로 저장합니다. 성적표는 신규 저장 또는 기존과 동일한 과목이 한 건 이상 있어야 합니다. 상태 갱신까지 성공하면 취업 목표로 이동합니다. |
+            | 취업 목표 | `GET /api/v1/me/career-goal`로 기존 목표를 불러오고 `PUT /api/v1/me/career-goal`로 저장합니다. 직무·지역 선택지는 `GET /api/v1/student-codes/job-categories`, `GET /api/v1/student-codes/regions/grouped`에서 조회합니다. | 목표 저장 후 `PREFERENCES`를 `COMPLETED`로 갱신합니다. |
+            | 수강 과목 (선택) | `GET /api/v1/me/courses`로 조회하고 직접 입력 시 `POST /api/v1/me/courses`로 저장합니다. | 성적표로 이미 완료했다면 이어서 진행합니다. 저장된 과목이 있으면 `COURSES`를 `COMPLETED`, 없고 건너뛰면 `SKIPPED`로 갱신합니다. |
+            | 프로젝트 (선택) | `GET /api/v1/me/projects`로 조회, `POST /api/v1/me/projects`로 추가 | `PROJECTS`를 완료하거나 건너뜁니다. |
+            | 인턴 (선택) | `GET /api/v1/me/internships`로 조회, `POST /api/v1/me/internships`로 추가 | `INTERNSHIPS`를 완료하거나 건너뜁니다. |
+            | 수상 (선택) | `GET /api/v1/me/awards`로 조회, `POST /api/v1/me/awards`로 추가 | `AWARDS`를 완료하거나 건너뜁니다. |
+            | 자격증 (선택) | `GET /api/v1/student-codes/certifications`로 코드, `GET /api/v1/me/certifications`로 기존 선택을 조회합니다. `PUT /api/v1/me/certifications`에 유지할 기존 코드까지 포함해 전체 목록을 보냅니다. | `CERTIFICATIONS`를 완료하거나 건너뜁니다. |
+            | 온보딩 완료 | `GET /api/v1/me/onboarding` | `finished: true`이면 완료입니다. 남은 단계는 `nextStep`으로 확인합니다. |
 
-            기존 미인증 계정은 로그인한 뒤 `POST /api/v1/me/email-verification`으로 번호를 발송하고 `POST /api/v1/me/email-verification/confirm`으로 인증을 완료합니다.
+            데이터 저장과 단계 상태 저장은 별도입니다. 각 화면에서 저장이 성공하면 `PATCH /api/v1/me/onboarding`의 `steps`에 `{"step":"BASIC_INFO","status":"COMPLETED"}`처럼 변경할 상태를 담으세요. 선택 항목은 저장된 기록이 있으면 `COMPLETED`, 기록 없이 건너뛰면 `SKIPPED`를 보냅니다. 저장이나 상태 갱신에 실패하면 해당 항목의 오류를 표시하고 현재 화면에 머무르세요. 데이터 저장 후 상태 갱신만 실패했다면 상태 갱신을 다시 시도하세요.
 
-            ### 학생 온보딩
-            1. `PATCH /api/v1/me`로 학생 기본 정보를, `PUT /api/v1/me/majors`로 전공 목록을 저장합니다.
-            2. 성적표를 첨부한 경우 `POST /api/v1/me/courses/import/preview`에 XLSX 파일을 업로드합니다. 미리보기에서 과목과 평점, 정규 이수학기를 확인한 뒤 같은 세션에서 `POST /api/v1/me/courses/import/confirm-all`에 `previewId`를 보내 전체 저장합니다.
-            3. 기본 정보, 전공, 첨부한 성적표의 저장이 모두 성공하면 `PATCH /api/v1/me/onboarding`으로 해당 단계 상태를 갱신합니다.
-            4. `PUT /api/v1/me/career-goal`로 취업 목표를 저장한 뒤 프로젝트·인턴·수상·자격증을 입력하거나 건너뜁니다.
+            가입 API는 자동 로그인하지 않습니다. 같은 세션의 이메일 인증 증명은 가입 시 한 번만 사용됩니다. 로그인하면 세션 ID와 CSRF 토큰이 갱신됩니다. 기존 미인증 계정은 SMTP를 켠 환경에서 로그인한 뒤 `POST /api/v1/me/email-verification` → `POST /api/v1/me/email-verification/confirm`을 호출하세요.
 
             ### 학생 기본 정보 다시 테스트하기
             `STUDENT_BASIC_RESET_ENABLED=true`인 개발 환경에서는 로그인 후 `DELETE /api/v1/me/basic-info`를 요청 본문 없이 호출할 수 있습니다. 성공 응답은 `204 No Content`입니다. Swagger UI가 변경 요청에 CSRF 토큰을 자동으로 첨부합니다.
