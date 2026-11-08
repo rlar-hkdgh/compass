@@ -21,6 +21,16 @@ public class OpenApiConfiguration {
 
             Compass Swagger UI의 인터셉터는 변경 요청마다 `GET /api/v1/auth/csrf`를 호출해 토큰을 받고 `X-CSRF-TOKEN` 헤더에 넣습니다. OpenAPI JSON을 외부 Swagger Editor에서 열면 이 인터셉터는 함께 로드되지 않습니다. 프론트엔드에서 직접 연동할 때는 같은 세션의 쿠키를 보내고, 변경 요청 전에 CSRF 응답의 `headerName`에 `token`을 설정하세요.
 
+            ### 별도 프론트엔드에서 세션 로그인 연동하기
+            프론트와 백엔드 주소가 다르면 CSRF 발급, 로그인, 로그인 후 조회·저장 요청 모두에 `fetch`의 `credentials: "include"`를 지정하세요. 서버는 `COMPASS_SECURITY_ALLOWED_ORIGINS`에 프론트의 정확한 출처(스킴·호스트·포트)를 등록해야 합니다. 여러 출처는 쉼표로 구분하며 경로와 와일드카드는 지원하지 않습니다.
+
+            1. `GET /api/v1/auth/csrf`를 호출해 세션 쿠키와 JSON의 `headerName`, `token`을 받습니다.
+            2. 같은 세션으로 `POST /api/v1/auth/login`을 호출합니다. JSON 본문은 `{"schoolEmail":"student@sju.ac.kr","password":"..."}`이고, `Content-Type: application/json`과 응답에서 받은 이름·값으로 CSRF 헤더를 설정합니다.
+            3. 로그인 성공 후 세션 ID와 CSRF 토큰이 바뀝니다. 이후 변경 요청(POST·PUT·PATCH·DELETE) 전에 `GET /api/v1/auth/csrf`를 다시 호출해 현재 세션의 토큰을 사용하세요. `GET /api/v1/me` 같은 조회에는 세션 쿠키만 필요합니다. 가입·인증번호 발송·확인도 로그인 전 세션에서 CSRF 토큰이 필요합니다.
+            4. `401 UNAUTHENTICATED`·`SESSION_EXPIRED`는 로그인 화면으로 돌아갈 신호이고, 로그인 요청의 `401 INVALID_CREDENTIALS`는 입력값을 확인할 신호입니다. `403 CSRF_INVALID`이면 현재 세션에서 토큰을 다시 발급받으세요.
+
+            `JSESSIONID`는 HttpOnly 쿠키이며 브라우저가 관리합니다. 서로 다른 사이트의 HTTPS 프론트와 백엔드가 쿠키를 공유하려면 백엔드에 `SESSION_COOKIE_SAME_SITE=none`과 `SESSION_COOKIE_SECURE=true`를 설정해야 합니다. 기본값 `lax`에서는 크로스사이트 fetch에 세션 쿠키가 전송되지 않습니다. 브라우저가 서드파티 쿠키를 차단하는 환경에서는 동일 출처 프록시를 통해 백엔드를 호출할 수 있습니다.
+
             ### Render 개발 서버에서 테스트하기
             현재 Render 개발 서버는 `MAIL_ENABLED=false`로 실행합니다. 가입 이메일 중복 확인은 가능하지만, 가입·기존 계정의 인증번호 발송은 `503 EMAIL_DELIVERY_FAILED`를 반환합니다.
 
@@ -37,7 +47,7 @@ public class OpenApiConfiguration {
             | 회원가입 | `POST /api/v1/auth/signup` | `201 Created`이면 로그인 화면으로 이동합니다. |
             | 로그인·이어하기 | `POST /api/v1/auth/login` → `GET /api/v1/me` → `GET /api/v1/me/onboarding` | 로그인과 조회에 성공하면 `nextStep`으로 이동합니다. 신규 계정은 모든 단계가 `NOT_STARTED`입니다. |
             | 학생 기본 정보·전공·성적표 | `GET /api/v1/me/majors`로 기존 전공을 불러옵니다. 첨부 시 `POST /api/v1/me/courses/import/preview`로 XLSX의 과목·평점·정규 이수학기를 확인합니다. 다음 버튼에서 `PATCH /api/v1/me` → `PUT /api/v1/me/majors` → 첨부한 경우 `POST /api/v1/me/courses/import/confirm-all`에 같은 세션의 `previewId`를 보냅니다. | 기본 정보·전공과 첨부한 성적표 저장이 모두 성공한 뒤, `BASIC_INFO`·`MAJORS`와 성적표를 처리한 경우 `COURSES`를 `COMPLETED`로 저장합니다. 성적표는 신규 저장 또는 기존과 동일한 과목이 한 건 이상 있어야 합니다. 상태 갱신까지 성공하면 취업 목표로 이동합니다. |
-            | 취업 목표 | `GET /api/v1/me/career-goal`로 기존 목표를 불러오고 `PUT /api/v1/me/career-goal`로 저장합니다. 직무·지역 선택지는 `GET /api/v1/student-codes/job-categories`, `GET /api/v1/student-codes/regions/grouped`에서 조회합니다. | 목표 저장 후 `PREFERENCES`를 `COMPLETED`로 갱신합니다. |
+            | 취업 목표 | `GET /api/v1/me/career-goal`로 기존 목표를 불러옵니다. 첫 진입의 `404 ITEM_NOT_FOUND`는 미등록 상태이므로 빈 입력 폼을 열고, 입력 후 `PUT /api/v1/me/career-goal`로 저장합니다. 직무·지역 선택지는 `GET /api/v1/student-codes/job-categories`, `GET /api/v1/student-codes/regions/grouped`에서 조회합니다. | 목표 저장 후 `PREFERENCES`를 `COMPLETED`로 갱신합니다. |
             | 수강 과목 (선택) | `GET /api/v1/me/courses`로 조회하고 직접 입력 시 `POST /api/v1/me/courses`로 저장합니다. | 성적표로 이미 완료했다면 이어서 진행합니다. 저장된 과목이 있으면 `COURSES`를 `COMPLETED`, 없고 건너뛰면 `SKIPPED`로 갱신합니다. |
             | 프로젝트 (선택) | `GET /api/v1/me/projects`로 조회, `POST /api/v1/me/projects`로 추가 | `PROJECTS`를 완료하거나 건너뜁니다. |
             | 인턴 (선택) | `GET /api/v1/me/internships`로 조회, `POST /api/v1/me/internships`로 추가 | `INTERNSHIPS`를 완료하거나 건너뜁니다. |
@@ -90,11 +100,17 @@ public class OpenApiConfiguration {
                 String description=description(path,method);
                 if(path.startsWith("/api/v1/auth/signup/email/")){
                     op.setSummary(path.endsWith("/availability")?"가입 전 학교 이메일 중복 확인":path.endsWith("/send")?"가입 전 인증번호 발송":"가입 전 인증번호 확인");
-                    description="로그인 없이 같은 브라우저 세션에서 실행합니다. schoolEmail은 소문자 sju.ac.kr 또는 sejong.co.kr 주소. availability는 available=true/false를 반환하며 주소를 예약하지 않습니다. send/confirm은 이미 가입된 주소에 409 EMAIL_EXISTS. 발송 번호 6자리·10분 유효, 재발송 60초, 이메일/세션당 24시간 10회(발송 실패 포함), 번호당 오입력 5회 제한. 재발송은 이전 번호와 인증 완료를 무효화합니다. confirm 성공 후 10분 안에 같은 세션과 동일 이메일로 signup을 호출하세요. 가입 시 재검증하여 한 번만 소비하며 실패한 가입은 증명을 소비하지 않습니다.";
-                    error(op,"409","EMAIL_EXISTS / DATA_CONFLICT");
-                    if(!path.endsWith("/availability"))error(op,"429","EMAIL_RESEND_COOLDOWN / EMAIL_SEND_LIMIT / EMAIL_ATTEMPTS_EXCEEDED");
-                    if(path.endsWith("/send"))error(op,"503","EMAIL_DELIVERY_FAILED: SMTP 비활성화, 미설정 또는 발송 실패");
-                    if(path.endsWith("/confirm"))error(op,"400","EMAIL_CODE_INVALID / EMAIL_CODE_EXPIRED / INVALID_REQUEST");
+                    description="로그인 없이 실행합니다. schoolEmail은 소문자 sju.ac.kr 또는 sejong.co.kr 주소입니다. ";
+                    if(path.endsWith("/availability")){
+                        description+="available=true이면 가입에 사용할 수 있고 false이면 이미 가입된 주소입니다. 중복 확인은 주소를 예약하지 않습니다.";
+                    } else if(path.endsWith("/send")){
+                        description+="6자리 번호를 발송합니다. expiresAt은 번호 만료 시각(10분 후), resendAvailableAt은 재발송 가능 시각(60초 후)입니다. 발송 한도는 실패를 포함해 이메일과 세션 각각 24시간당 10회입니다. 재발송하면 이전 번호와 인증 완료 상태가 무효화됩니다. 이미 가입된 주소는 409 EMAIL_EXISTS입니다.";
+                        error(op,"429","EMAIL_RESEND_COOLDOWN: 재발송 간격 60초 / EMAIL_SEND_LIMIT: 이메일 또는 세션 발송 한도 초과");
+                        error(op,"503","EMAIL_DELIVERY_FAILED: SMTP 비활성화, 미설정 또는 발송 실패");
+                    } else {
+                        description+="번호를 발송한 세션에서 같은 schoolEmail과 숫자 6자리 code 문자열을 보냅니다. 성공하면 emailVerified=true이며 verifiedUntil까지 같은 세션과 이메일로 가입할 수 있습니다(확인 성공 후 10분). 번호 오입력은 최대 5회입니다. 이미 가입된 주소는 409 EMAIL_EXISTS입니다.";
+                        error(op,"429","EMAIL_ATTEMPTS_EXCEEDED: 번호 오입력 한도 초과. 새 번호를 발송하세요.");
+                    }
                 }
                 if(path.equals("/api/v1/auth/signup"))error(op,"400","EMAIL_VERIFICATION_REQUIRED: 같은 세션에서 동일 학교 이메일 인증 후 10분 내 가입 필요 / INVALID_REQUEST");
                 if(owned)description+=" 본인 세션의 데이터만 처리하며 다른 학생의 항목은 404입니다.";
@@ -112,13 +128,15 @@ public class OpenApiConfiguration {
                     error(op,"401","INVALID_CREDENTIALS: 비밀번호 불일치 / UNAUTHENTICATED / SESSION_EXPIRED");
                 if(path.contains("email-verification") && write) {
                     error(op,"409","EMAIL_ALREADY_VERIFIED / DATA_CONFLICT");
-                    error(op,"429","EMAIL_RESEND_COOLDOWN (60초), EMAIL_SEND_LIMIT (24시간 10회), EMAIL_ATTEMPTS_EXCEEDED (번호당 5회)");
+                    error(op,"429",path.endsWith("/confirm")
+                        ?"EMAIL_ATTEMPTS_EXCEEDED: 번호 오입력 한도 초과. 새 번호를 발송하세요."
+                        :"EMAIL_RESEND_COOLDOWN: 재발송 간격 60초 / EMAIL_SEND_LIMIT: 24시간당 10회 초과");
                     if(path.endsWith("/confirm"))error(op,"400","INVALID_REQUEST: 숫자 6자리 필요 / EMAIL_CODE_INVALID / EMAIL_CODE_EXPIRED");
                     else error(op,"503","EMAIL_DELIVERY_FAILED: SMTP 미설정 또는 발송 실패. 비밀값과 번호는 응답에 포함하지 않습니다.");
                 }
                 if(path.endsWith("/import/preview")) error(op,"413","UPLOAD_TOO_LARGE: 비어 있거나 5MiB 초과 파일 / 요청 크기 초과");
                 if(path.endsWith("/import/confirm"))error(op,"409","PREVIEW_NOT_FOUND / PREVIEW_EXPIRED / PREVIEW_CONSUMED / COURSE_IMPORT_CONFLICT / DATA_CONFLICT");
-                if(path.endsWith("/readme"))error(op,"404","README_NOT_COLLECTED / ITEM_NOT_FOUND");
+                if(path.endsWith("/readme"))error(op,"404","README_NOT_COLLECTED: 현재 저장소에 수집 이력 없음 / ITEM_NOT_FOUND: 프로젝트 없음 또는 다른 학생 소유");
                 if(path.endsWith("/readme/collect")) {
                     error(op,"409","README_COLLECTION_IN_PROGRESS / PROJECT_CHANGED / DATA_CONFLICT");
                     error(op,"429","README_COLLECTOR_BUSY / README_COLLECTION_COOLDOWN (30초)");

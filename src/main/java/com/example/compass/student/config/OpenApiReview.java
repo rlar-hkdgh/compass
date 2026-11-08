@@ -1,5 +1,6 @@
 package com.example.compass.student.config;
 
+import com.example.compass.student.entity.OnboardingStep;
 import io.swagger.v3.oas.models.*;
 import io.swagger.v3.oas.models.media.*;
 import io.swagger.v3.oas.models.examples.Example;
@@ -64,9 +65,13 @@ final class OpenApiReview {
   if(path.equals("/api/v1/student-codes/regions/grouped"))description="로그인 없이 지역을 시·도, 전국, 해외 그룹으로 조회합니다. 그룹 이름은 name이고 regions에는 시·도 전체와 세부 지역의 code·name이 포함됩니다. 취업 목표나 학생 선호에 저장할 때는 선택한 code를 regionCodes 배열로 보냅니다.";
   if(path.endsWith("/courses/import/preview"))description+=" 지원 헤더는 년도(연도·학년도), 학기, 학수번호(과목번호), 교과목명(과목명), 평가방식(평가방법), 등급(성적등급)이며 평점·학점 열은 선택입니다. 최대 5개 시트·1000개 과목을 처리합니다. 행별 오류가 있어도 200 미리보기를 반환할 수 있습니다. wholeImport에는 전체 저장 대상 수, 동일 행 건너뛰기 수, 오류·충돌 행이 포함됩니다. completedSemesters는 계절학기를 제외한 연도·정규학기 조합의 개수이며 계산할 수 없으면 null입니다.";
   if(path.endsWith("/courses/import/confirm-all")){
-   description="같은 로그인 세션에서 15분 이내에 발급된 미리보기의 previewId만 보냅니다. 정상 과목을 저장하고 동일 기록은 건너뜁니다. 오류나 충돌이 있는 행은 rowIssues로 반환하며 기존 과목을 덮어쓰지 않습니다. 저장 또는 동일 기록이 있고 파일 평점을 계산할 수 있으면 4.5 만점 평점을 프로필에 자동 저장합니다. 같은 조건에서 계산된 정규 이수학기 수도 자동 저장하고 savedCompletedSemesters로 반환합니다. 미리보기가 없거나 만료됐거나 이미 사용된 경우 409입니다. 로그인 세션과 CSRF 토큰이 필요합니다.";
+   description="같은 로그인 세션에서 15분 이내에 발급된 미리보기의 previewId만 보냅니다. 정상 과목을 저장하고 동일 기록은 건너뜁니다. 오류나 충돌이 있는 행은 rowIssues로 반환하며 기존 과목을 덮어쓰지 않습니다. 200이어도 rowIssues가 비어 있지 않을 수 있으므로 행별 오류를 표시하세요. inserted는 신규 저장 건수, skipped는 기존 또는 같은 파일에 있는 동일 과목으로 건너뛴 건수입니다. 둘의 합이 0이면 과목·평점·이수학기 저장 없이 처리된 결과이므로 성적표 입력을 완료로 표시하지 마세요. 오류 행을 수정해 다시 저장하려면 새 미리보기를 발급받으세요. 저장 또는 동일 기록이 있고 파일 평점을 계산할 수 있으면 4.5 만점 평점을 프로필에 자동 저장합니다. 같은 조건에서 계산된 정규 이수학기 수도 자동 저장하고 savedCompletedSemesters로 반환합니다. 미리보기가 없거나 만료됐거나 이미 사용된 경우 409입니다. 로그인 세션과 CSRF 토큰이 필요합니다.";
    op.getResponses().remove("404");
-   op.getResponses().get("409").setDescription("PREVIEW_NOT_FOUND, PREVIEW_EXPIRED, PREVIEW_CONSUMED 또는 저장 충돌");
+   op.getResponses().get("409").setDescription("PREVIEW_NOT_FOUND, PREVIEW_EXPIRED, PREVIEW_CONSUMED 또는 DATA_CONFLICT");
+   responseExample(op,"200","부분 성공",Map.of(
+       "inserted",2,"skipped",1,"savedGpa",3.85,"savedCompletedSemesters",2,
+       "rowIssues",List.of(Map.of("sheetName","성적","sourceRow",7,"issues",List.of(
+           Map.of("code","COURSE_IMPORT_CONFLICT","message","같은 연도·학기·학수번호의 기존 기록과 내용이 다릅니다."))))));
   }
   if(path.startsWith("/internal/"))description="내부 입력 기능이며 import-enabled=true일 때만 등록됩니다. 기존 보안 정책상 HTTP 접근은 차단되므로 Swagger에서 실행할 수 없습니다. 공고 저장은 출처와 공고 식별값으로 갱신합니다. 접수 시작은 종료보다 늦을 수 없고 급여는 0 이상, 최소 금액은 최대 금액 이하여야 합니다. 급여 금액을 지정하면 지급 단위와 DISCLOSED 결정 코드가 필요합니다. 자세한 필드 제한은 요청 스키마를 확인하세요.";
   if(path.equals("/api/v1/me") && (get || method==PathItem.HttpMethod.PATCH)){
@@ -78,10 +83,33 @@ final class OpenApiReview {
   }
   if(path.equals("/api/v1/me/career-goal")){
    op.setSummary(get?"취업 목표 조회":"취업 목표 전체 저장");
-   description="목표 설정·희망 직무 변경 화면에서 사용하는 본인 취업 목표입니다. GET은 미등록 시 404 ITEM_NOT_FOUND, PUT은 신규/수정 모두 200입니다. companySizes로 기업 규모를 1~4개 선택합니다. jobCategoryCode는 GET /api/v1/student-codes/job-categories의 공고 공통 코드를 사용합니다. targetDate는 취업 목표 연월 YYYY-MM(1900-01~2100-12), targetSalary는 만원 단위 연봉입니다. regionCodes는 GET /api/v1/student-codes/regions/grouped의 regions 안에 있는 code를 사용합니다. 평면 목록은 GET /api/v1/student-codes/regions에서도 조회할 수 있습니다. 지역은 기존 preferences.regionCodes와 같은 저장소를 공유하므로 어느 API로 변경해도 다른 조회에 반영됩니다. 다른 선호 항목과 성적·이력은 변경하지 않습니다. 저장과 지역 교체는 한 트랜잭션으로 처리합니다. 목표 저장만으로 진단·분석·로드맵을 생성하거나 온보딩을 자동 완료하지 않습니다. 로그인 세션과 PUT 요청의 CSRF 토큰이 필요합니다.";
-   if(!get){op.getRequestBody().getContent().get("application/json").addExamples("취업 목표",new Example().summary("2027년 6월 취업 목표").value(Map.of("jobCategoryCode","84","companySizes",List.of("LARGE","MID"),"targetSalary",5000,"regionCodes",List.of("101000"),"targetCompany","네이버","targetDate","2027-06")));}
+   description="목표 설정·희망 직무 변경 화면에서 사용하는 본인 취업 목표입니다. GET이 404 ITEM_NOT_FOUND를 반환하면 아직 취업 목표가 등록되지 않은 상태입니다. 첫 진입에서는 빈 입력 폼을 열고, 저장 시 PUT을 호출하세요. PUT은 최초 등록과 수정 모두 200입니다. companySizes로 기업 규모를 1~4개 선택합니다. jobCategoryCode는 GET /api/v1/student-codes/job-categories의 공고 공통 코드를 사용합니다. targetDate는 취업 목표 연월 YYYY-MM(1900-01~2100-12), targetSalary는 만원 단위 연봉입니다. regionCodes는 GET /api/v1/student-codes/regions/grouped의 regions 안에 있는 code를 사용합니다. 평면 목록은 GET /api/v1/student-codes/regions에서도 조회할 수 있습니다. 지역은 기존 preferences.regionCodes와 같은 저장소를 공유하므로 어느 API로 변경해도 다른 조회에 반영됩니다. 다른 선호 항목과 성적·이력은 변경하지 않습니다. 저장과 지역 교체는 한 트랜잭션으로 처리합니다. 목표 저장만으로 진단·분석·로드맵을 생성하거나 온보딩을 자동 완료하지 않습니다. 로그인 세션과 PUT 요청의 CSRF 토큰이 필요합니다.";
+   if(get){
+    op.getResponses().get("404").setDescription("ITEM_NOT_FOUND: 저장된 취업 목표가 없습니다. 첫 진입에서는 빈 입력 폼을 표시하세요.");
+    responseExample(op,"404","목표 미등록",Map.of("code","ITEM_NOT_FOUND","message","항목을 찾을 수 없습니다."));
+   } else {op.getRequestBody().getContent().get("application/json").addExamples("취업 목표",new Example().summary("2027년 6월 취업 목표").value(Map.of("jobCategoryCode","84","companySizes",List.of("LARGE","MID"),"targetSalary",5000,"regionCodes",List.of("101000"),"targetCompany","네이버","targetDate","2027-06")));}
   }
-  if(path.contains("/onboarding"))description+=" 화면의 학생 정보는 BASIC_INFO·MAJORS·COURSES에 대응하고, 목표 설정은 PREFERENCES에 대응합니다. 기본 정보·전공·성적과 취업 목표/선호를 각각 저장한 뒤 상태를 PATCH하세요. 이후 PROJECTS·INTERNSHIPS·AWARDS·CERTIFICATIONS는 입력 또는 SKIPPED로 처리합니다. 입력값 저장과 진행 상태 변경은 별도 요청입니다.";
+  if(path.equals("/api/v1/me/onboarding")){
+   description+=" nextStep은 정의된 순서상 첫 NOT_STARTED 단계입니다. 모든 단계가 COMPLETED 또는 SKIPPED이면 finished=true이며 nextStep은 null입니다. 신규 가입 직후에는 진행 상태가 저장되지 않아도 8개 단계 모두 NOT_STARTED로 조회됩니다.";
+   if(get){
+    responseExample(op,"200","가입 직후",onboardingExample(false));
+    responseExample(op,"200","온보딩 완료",onboardingExample(true));
+   } else {
+    description+=" 입력 데이터 저장 후 별도로 호출합니다. steps에는 바꿀 단계만 넣으세요. 같은 단계 중복은 400 DUPLICATE_INPUT입니다. NOT_STARTED는 진행 상태만 초기화합니다.";
+    op.getRequestBody().getContent().get("application/json").addExamples("기본 정보와 전공 완료",
+        new Example().value(Map.of("steps",List.of(
+            Map.of("step","BASIC_INFO","status","COMPLETED"),
+            Map.of("step","MAJORS","status","COMPLETED")))));
+   }
+  }
+  if(path.endsWith("/readme") || path.endsWith("/readme/collect")){
+   description+=" lastAttemptStatus는 SUCCESS(성공), NOT_FOUND(README를 찾지 못함), RATE_LIMITED(GitHub 요청 제한), FAILED(그 외 실패)입니다. 마지막 시도가 실패해도 이전 성공의 content와 lastSuccessAt이 남을 수 있습니다.";
+   if(!get)responseExample(op,"200","이전 README 보존",Map.of(
+       "projectId",12,"repositoryUrl","https://github.com/example/sample","readmePath","README.md",
+       "readmeSha","0123456789abcdef0123456789abcdef01234567","content","# 이전에 수집한 README",
+       "lastSuccessAt","2026-11-07T03:00:00Z","lastAttemptAt","2026-11-08T03:00:00Z",
+       "lastAttemptStatus","RATE_LIMITED","lastErrorCode","GITHUB_RATE_LIMITED"));
+  }
   if(path.equals("/api/v1/auth/signup") || path.equals("/api/v1/auth/login")){
    var example=new LinkedHashMap<String,Object>();example.put("schoolEmail","student@sju.ac.kr");example.put("password","Example-password-123!");
    if(path.endsWith("/signup")){example.put("name","홍길동");example.put("isTransfer",false);}
@@ -94,13 +122,14 @@ final class OpenApiReview {
   if(!item && !path.contains("/readme") && !path.contains("/onboarding") && !path.endsWith("/career-goal") && !path.equals("/api/v1/me") && !path.endsWith("/password") && !path.contains("/email-verification") && !path.contains("/import/") && !path.contains("-codes/"))op.getResponses().remove("404");
   if(path.equals("/api/v1/student-codes/regions/grouped"))op.getResponses().remove("400");
   if(path.endsWith("-codes/{type}"))op.getResponses().get("404").setDescription("CODE_TYPE_NOT_FOUND: 지정한 코드 종류를 지원하지 않습니다.");
-  if(path.equals("/api/v1/me/preferences") && write){
-   op.getResponses().get("400").setDescription("INVALID_REQUEST: 배열 누락·100개 초과·음수 급여·급여 금액/단위 불일치 / UNKNOWN_CODE: 미등록 코드 / DUPLICATE_INPUT: 중복 코드");
-  }
   if(op.getResponses().containsKey("400") && !path.equals("/api/v1/auth/signup")){
    String error="INVALID_REQUEST: 요청 형식·필수값·검증 조건을 확인하세요.";
    if(path.endsWith("/confirm") && (path.contains("email-verification")||path.contains("/signup/email/")))error+=" EMAIL_CODE_INVALID: 번호 또는 세션 불일치, EMAIL_CODE_EXPIRED: 번호 유효기간 만료.";
    if(write && ((resource!=null && (path.contains("/projects")||path.contains("/internships"))) || path.endsWith("/career-goal") || path.equals("/api/v1/me/preferences") || path.equals("/api/v1/me/majors") || path.equals("/api/v1/me/certifications")))error+=" UNKNOWN_CODE: 미등록 코드, DUPLICATE_INPUT: 중복 입력.";
+   if(path.equals("/api/v1/me/preferences") && write)error+=" 세 배열은 필수이며 최대 100개입니다. 급여는 0 이상이며 금액과 단위를 함께 지정하세요.";
+   if(path.equals("/api/v1/me/onboarding") && write)error+=" DUPLICATE_INPUT: 같은 단계가 요청에 중복되었습니다.";
+   if(path.endsWith("/courses/import/preview"))error+=" INVALID_TRANSCRIPT: XLSX 내용을 읽을 수 없거나 지원 형식·제한에 맞지 않습니다.";
+   if(path.endsWith("/courses/import/confirm"))error+=" DUPLICATE_INPUT: 같은 연도·학기·학수번호의 과목을 중복 선택했습니다.";
    op.getResponses().get("400").setDescription(error);
   }
   op.getResponses().forEach((status,response)->{
@@ -128,6 +157,24 @@ final class OpenApiReview {
     default->"요청에 사용할 "+p.getName()+" 값";
    });
   }
+ }
+ private static void responseExample(Operation op,String status,String name,Map<String,Object> value){
+  var content=op.getResponses().get(status).getContent();
+  var media=content.values().iterator().next();
+  media.addExamples(name,new Example().summary(name).value(value));
+ }
+ private static Map<String,Object> onboardingExample(boolean finished){
+  var steps=Arrays.stream(OnboardingStep.values())
+      .map(step->Map.of("step",step.name(),"status",finished
+          ? (step.ordinal()<3?"COMPLETED":"SKIPPED") : "NOT_STARTED")).toList();
+  Map<String,Object> example=new LinkedHashMap<>();
+  example.put("steps",steps);
+  example.put("nextStep",finished?null:"BASIC_INFO");
+  example.put("finished",finished);
+  example.put("totalSteps",steps.size());
+  example.put("completedSteps",finished?3:0);
+  example.put("skippedSteps",finished?steps.size()-3:0);
+  return example;
  }
  private static String resource(String path){
   if(!path.matches("/api/v1/me/(projects|internships|awards|courses)(/\\{id\\})?"))return null;
