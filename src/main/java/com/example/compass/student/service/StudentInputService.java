@@ -41,6 +41,17 @@ import static com.example.compass.student.dto.StudentDtos.*;
         return profile(student);
     }
 
+    public void resetBasicInfo(long student) {
+        lock(student);
+        db.update("delete from student_major where student_id=?", student);
+        db.update("delete from student_course where student_id=?", student);
+        db.update("update student set semester=null, gpa=null, gpa_scale=null where id=?", student);
+        db.update("""
+            delete from student_onboarding_step where student_id=?
+                and step_code in ('BASIC_INFO', 'MAJORS', 'COURSES')
+            """, student);
+    }
+
     void code(String table,String value){
         if(value==null||value.isBlank()||value.length()>32||db.queryForObject("select count(*) from "+table+" where code=?",Integer.class,value)!=1)throw new ApiErrors.Failure(400,"UNKNOWN_CODE","등록되지 않은 코드입니다.");
     }

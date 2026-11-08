@@ -21,7 +21,14 @@ public class OpenApiConfiguration {
 
             Compass Swagger UI의 인터셉터는 변경 요청마다 `GET /api/v1/auth/csrf`를 호출해 토큰을 받고 `X-CSRF-TOKEN` 헤더에 넣습니다. OpenAPI JSON을 외부 Swagger Editor에서 열면 이 인터셉터는 함께 로드되지 않습니다. 프론트엔드에서 직접 연동할 때는 같은 세션의 쿠키를 보내고, 변경 요청 전에 CSRF 응답의 `headerName`에 `token`을 설정하세요.
 
-            ### 학교 이메일 인증과 로그인
+            ### Render 개발 서버에서 테스트하기
+            현재 Render 개발 서버는 `MAIL_ENABLED=false`로 실행합니다. 가입 이메일 중복 확인은 가능하지만, 가입·기존 계정의 인증번호 발송은 `503 EMAIL_DELIVERY_FAILED`를 반환합니다.
+
+            1. 신규 테스트 계정은 같은 `sejong-compass` DB에 연결된 로컬 Compass에서 SMTP를 켜고 학교 이메일 인증과 가입을 완료합니다.
+            2. Render의 Compass Swagger UI를 열고 그 계정의 `schoolEmail`과 비밀번호로 `POST /api/v1/auth/login`을 실행합니다. `GET /api/v1/me`에서 프로필과 `emailVerified: true`를 확인합니다.
+            3. 같은 브라우저에서 아래 온보딩 흐름을 테스트합니다. 로그인 이후 학생 정보 입력과 저장에는 SMTP가 필요 없습니다.
+
+            ### 학교 이메일 인증과 로그인 (SMTP를 켠 환경)
             신규 가입은 `POST /api/v1/auth/signup/email/availability` → `POST /api/v1/auth/signup/email/send` → `POST /api/v1/auth/signup/email/confirm` → `POST /api/v1/auth/signup` 순서로 진행합니다. 같은 브라우저 세션에서 이메일 인증을 마치고 10분 안에 가입하세요. 가입 증명은 한 번만 사용됩니다.
 
             가입 후 `POST /api/v1/auth/login`으로 로그인하고 `GET /api/v1/me`로 프로필을 확인합니다. 가입과 로그인에는 `schoolEmail`을 사용합니다. 로그인하면 세션 ID와 CSRF 토큰이 갱신됩니다.
@@ -33,6 +40,13 @@ public class OpenApiConfiguration {
             2. 성적표를 첨부한 경우 `POST /api/v1/me/courses/import/preview`에 XLSX 파일을 업로드합니다. 미리보기에서 과목과 평점, 정규 이수학기를 확인한 뒤 같은 세션에서 `POST /api/v1/me/courses/import/confirm-all`에 `previewId`를 보내 전체 저장합니다.
             3. 기본 정보, 전공, 첨부한 성적표의 저장이 모두 성공하면 `PATCH /api/v1/me/onboarding`으로 해당 단계 상태를 갱신합니다.
             4. `PUT /api/v1/me/career-goal`로 취업 목표를 저장한 뒤 프로젝트·인턴·수상·자격증을 입력하거나 건너뜁니다.
+
+            ### 학생 기본 정보 다시 테스트하기
+            `STUDENT_BASIC_RESET_ENABLED=true`인 개발 환경에서는 로그인 후 `DELETE /api/v1/me/basic-info`를 요청 본문 없이 호출할 수 있습니다. 성공 응답은 `204 No Content`입니다. Swagger UI가 변경 요청에 CSRF 토큰을 자동으로 첨부합니다.
+
+            초기화하면 전공·수강 과목·평점·정규 이수학기와 `BASIC_INFO`, `MAJORS`, `COURSES` 상태가 지워집니다. 현재 브라우저의 성적표 미리보기도 폐기됩니다. 계정, 학교 이메일 인증, 로그인 세션, 이름·편입 여부, 취업 목표와 선택 이력은 보존됩니다.
+
+            초기화 후 `GET /api/v1/me`, `GET /api/v1/me/majors`, `GET /api/v1/me/onboarding`에서 초기화 결과를 확인합니다. 같은 계정으로 기본 정보와 전공을 저장하고, 성적표가 있으면 새 미리보기부터 다시 실행합니다.
 
             비밀번호를 변경한 뒤에는 다시 로그인해야 합니다. 회원탈퇴는 계정과 연결된 개인 데이터를 영구 삭제합니다.
 
@@ -71,7 +85,7 @@ public class OpenApiConfiguration {
                     description="로그인 없이 같은 브라우저 세션에서 실행합니다. schoolEmail은 소문자 sju.ac.kr 또는 sejong.co.kr 주소. availability는 available=true/false를 반환하며 주소를 예약하지 않습니다. send/confirm은 이미 가입된 주소에 409 EMAIL_EXISTS. 발송 번호 6자리·10분 유효, 재발송 60초, 이메일/세션당 24시간 10회(발송 실패 포함), 번호당 오입력 5회 제한. 재발송은 이전 번호와 인증 완료를 무효화합니다. confirm 성공 후 10분 안에 같은 세션과 동일 이메일로 signup을 호출하세요. 가입 시 재검증하여 한 번만 소비하며 실패한 가입은 증명을 소비하지 않습니다.";
                     error(op,"409","EMAIL_EXISTS / DATA_CONFLICT");
                     if(!path.endsWith("/availability"))error(op,"429","EMAIL_RESEND_COOLDOWN / EMAIL_SEND_LIMIT / EMAIL_ATTEMPTS_EXCEEDED");
-                    if(path.endsWith("/send"))error(op,"503","EMAIL_DELIVERY_FAILED");
+                    if(path.endsWith("/send"))error(op,"503","EMAIL_DELIVERY_FAILED: SMTP 비활성화, 미설정 또는 발송 실패");
                     if(path.endsWith("/confirm"))error(op,"400","EMAIL_CODE_INVALID / EMAIL_CODE_EXPIRED / INVALID_REQUEST");
                 }
                 if(path.equals("/api/v1/auth/signup"))error(op,"400","EMAIL_VERIFICATION_REQUIRED: 같은 세션에서 동일 학교 이메일 인증 후 10분 내 가입 필요 / INVALID_REQUEST");
@@ -162,6 +176,7 @@ public class OpenApiConfiguration {
             case "/api/v1/me/email-verification" -> method==PathItem.HttpMethod.GET?"학교 이메일 인증 상태 조회":"학교 이메일 인증번호 발송";
             case "/api/v1/me/email-verification/confirm" -> "학교 이메일 인증번호 확인";
             case "/api/v1/me/password" -> "비밀번호 변경";
+            case "/api/v1/me/basic-info" -> "학생 기본 정보 테스트 초기화";
             case "/api/v1/me/onboarding" -> method==PathItem.HttpMethod.GET?"온보딩 진행 조회":"온보딩 진행 수정";
             case "/api/v1/me/courses/import/preview" -> "XLSX 성적표 미리보기";
             case "/api/v1/me/courses/import/confirm" -> "선택한 성적표 행 저장";
@@ -170,6 +185,7 @@ public class OpenApiConfiguration {
         };
     }
     private static String description(String path,PathItem.HttpMethod method) {
+        if(path.equals("/api/v1/me/basic-info"))return "STUDENT_BASIC_RESET_ENABLED=true인 개발 환경에서 본인의 전공, 수강 과목, 평점과 이수학기를 삭제하고 BASIC_INFO·MAJORS·COURSES 진행 상태를 초기화합니다. 현재 세션의 성적표 미리보기도 폐기합니다. 계정, 이름, 편입 여부, 이메일 인증, 취업 목표와 선택 이력은 보존됩니다. 요청 본문 없이 호출하며 성공 시 204입니다.";
         if(path.equals("/api/v1/me") && method==PathItem.HttpMethod.DELETE)return "currentPassword 재확인 후 계정·학생 입력·프로젝트 README·온보딩·이메일 인증·개인 분석/추천을 영구 삭제합니다. 공용 공고/공고 분석·활동·코드 사전은 보존합니다. 전체 세션과 성적표 미리보기를 폐기합니다. 성공 204, 삭제 중 DB 오류는 전체 롤백.";
         if(path.contains("email-verification"))return "가입·로그인 후 사용합니다. 수신 주소는 서버에 저장된 본인 학교 이메일로 고정됩니다. 인증번호는 숫자 6자리, 10분 유효, 재발송 간격 60초, 24시간 최대 10회(실패 포함), 번호당 오입력 5회 제한. 재발송 시 이전 번호 무효화. 성공한 번호는 재사용 불가.";
         if(path.endsWith("/import/preview"))return "multipart/form-data의 필수 file 파트에 비어 있지 않은 .xlsx 파일(최대 5MiB)을 첨부합니다. 원본 파일은 저장하지 않으며 세션당 미리보기 1개를 15분 보관합니다. 응답의 errors/warnings와 existingCourseIds를 확인하세요. 충분한 학점·등급 데이터가 있는 경우 파일 기준 4.5 만점 가중평점 gpa를 반환합니다.";

@@ -114,6 +114,15 @@ public class TranscriptImportService {
         }));
     }
 
+    public void discardPreview(HttpSession session) {
+        if (session.getAttribute(ATTRIBUTE) instanceof Draft draft) {
+            synchronized (draft) {
+                draft.used = true;
+                if (session.getAttribute(ATTRIBUTE) == draft) session.removeAttribute(ATTRIBUTE);
+            }
+        }
+    }
+
     private <T> T useDraft(long student, HttpSession session, String previewId, Function<TranscriptPreview, T> action) {
         Object value = session.getAttribute(ATTRIBUTE);
         if (!(value instanceof Draft draft) || draft.student != student || !draft.preview.previewId().equals(previewId))

@@ -276,6 +276,7 @@ class AccountIntegrationTests {
         assertThat(paths.get("/api/v1/me/projects/{id}").get("put").get("description").asText()).contains("목록 전체를 교체하는 API가 아닙니다");
         assertThat(paths.get("/api/v1/auth/login").get("post").get("responses").has("409")).isFalse();
         assertThat(paths.get("/api/v1/auth/signup/email/availability").get("post").get("responses").has("409")).isFalse();
+        assertThat(paths.has("/api/v1/me/basic-info")).isFalse();
         assertThat(paths.has("/api/v1/job-postings")).isFalse();
         assertThat(paths.has("/api/v1/job-postings/{source}/{sourcePostingId}")).isFalse();
     }

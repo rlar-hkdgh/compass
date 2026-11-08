@@ -30,7 +30,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.assertj.core.api.Assertions.*;
 
-@SpringBootTest(properties={"spring.datasource.url=jdbc:h2:mem:input-assist-isolated;MODE=PostgreSQL;DB_CLOSE_DELAY=-1","compass.recruit.import-enabled=false"})
+@SpringBootTest(properties={"spring.datasource.url=jdbc:h2:mem:input-assist-isolated;MODE=PostgreSQL;DB_CLOSE_DELAY=-1","compass.recruit.import-enabled=false","compass.student.basic-reset-enabled=true","compass.docs.enabled=true"})
 @ContextConfiguration(initializers=TestDatabase.class)
 @Import(InputAssistIntegrationTests.Fakes.class)
 class InputAssistIntegrationTests {
@@ -88,6 +88,50 @@ class InputAssistIntegrationTests {
     long project(Account a) throws Exception {var result=send("POST","/api/v1/me/projects",a.session(),projectInput("https://github.com/fixture/repository")).andExpect(status().isCreated()).andReturn();return json.readTree(result.getResponse().getContentAsString()).get("id").asLong();}
     ProjectInput projectInput(String url){return new ProjectInput("프로젝트","목적과 기능","본인의 구현",null,url,List.of());}
     String readmePath(long project){return "/api/v1/me/projects/"+project+"/readme";}
+    @Test void basicInfoResetPreservesAccountAndOtherStepsAndDiscardsCurrentPreview() throws Exception {
+        var account = account();
+        var other = account();
+        var file = TranscriptWorkbookParserTests.workbook("수업", false, false);
+        confirmAll(account, preview(account, file)).andExpect(status().isOk());
+        confirmAll(other, preview(other, file)).andExpect(status().isOk());
+        var draft = preview(account, file);
+        var majors = Map.of("majors", List.of(Map.of("majorCode", "3513", "completionTypeCode", "PRIMARY")));
+        send("PUT", "/api/v1/me/majors", account.session(), majors).andExpect(status().isOk());
+        project(account);
+        send("PUT", "/api/v1/me/career-goal", account.session(), Map.of(
+            "jobCategoryCode", "84", "companySizes", List.of("LARGE"), "targetSalary", 5000,
+            "regionCodes", List.of("101000"), "targetCompany", "기업", "targetDate", "2027-06")).andExpect(status().isOk());
+        for (var step : List.of("BASIC_INFO", "MAJORS", "COURSES", "PREFERENCES", "PROJECTS"))
+            db.update("insert into student_onboarding_step values(?,?,'COMPLETED')", account.id(), step);
+
+        String path = "/api/v1/me/basic-info";
+        mvc.perform(delete(path).session(account.session())).andExpect(status().isForbidden());
+        var anon = anonymous();
+        mvc.perform(delete(path).session(anon).header("X-CSRF-TOKEN", token(anon))).andExpect(status().isUnauthorized());
+        send("DELETE", path, account.session(), null).andExpect(status().isNoContent());
+        send("DELETE", path, account.session(), null).andExpect(status().isNoContent());
+        confirmAll(account, draft).andExpect(status().isConflict()).andExpect(jsonPath("$.code").value("PREVIEW_NOT_FOUND"));
+
+        assertThat(count(account.id())).isZero();
+        assertThat(count(other.id())).isEqualTo(2);
+        mvc.perform(get("/api/v1/me/majors").session(account.session())).andExpect(jsonPath("$.majors").isEmpty());
+        mvc.perform(get("/api/v1/me").session(account.session())).andExpect(status().isOk())
+            .andExpect(jsonPath("$.name").value("입력 보조 테스트")).andExpect(jsonPath("$.emailVerified").value(true))
+            .andExpect(jsonPath("$.semester").doesNotExist()).andExpect(jsonPath("$.gpa").doesNotExist())
+            .andExpect(jsonPath("$.gpaScale").doesNotExist());
+        mvc.perform(get("/api/v1/me/projects").session(account.session())).andExpect(jsonPath("$.length()").value(1));
+        mvc.perform(get("/api/v1/me/career-goal").session(account.session())).andExpect(status().isOk())
+            .andExpect(jsonPath("$.jobCategoryCode").value("84"));
+        assertThat(db.queryForList("select step_code from student_onboarding_step where student_id=?", String.class, account.id()))
+            .containsExactlyInAnyOrder("PREFERENCES", "PROJECTS");
+        var spec = json.readTree(mvc.perform(get("/v3/api-docs")).andExpect(status().isOk())
+            .andReturn().getResponse().getContentAsString());
+        assertThat(spec.at("/paths/~1api~1v1~1me~1basic-info/delete/responses/204").isMissingNode()).isFalse();
+        assertThat(spec.at("/info/description").asText())
+            .contains("MAIL_ENABLED=false", "503 EMAIL_DELIVERY_FAILED", "STUDENT_BASIC_RESET_ENABLED=true",
+                "DELETE /api/v1/me/basic-info", "GET /api/v1/me/onboarding");
+    }
+
     @Test void previewDoesNotWriteAndConfirmSavesOnlyReviewedRowsWithNumericIdempotence() throws Exception {
         var a=account();var preview=preview(a,TranscriptWorkbookParserTests.workbook("수업",false,false));
         assertThat(count(a.id())).isZero();assertThat(preview.get("rows").size()).isEqualTo(2);

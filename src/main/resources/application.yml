@@ -26,6 +26,8 @@ compass:
     enabled: ${API_DOCS_ENABLED:false}
   demo:
     enabled: ${DEMO_ENABLED:false}
+  student:
+    basic-reset-enabled: ${STUDENT_BASIC_RESET_ENABLED:false}
   mail:
     enabled: ${MAIL_ENABLED:false}
     host: ${SMTP_HOST:smtp.gmail.com}
