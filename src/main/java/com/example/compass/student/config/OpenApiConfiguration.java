@@ -193,7 +193,7 @@ public class OpenApiConfiguration {
         if(path.contains("/readme"))return "본인 프로젝트의 공개 GitHub README만 처리합니다. 수집 실패도 200 응답의 lastAttemptStatus/lastErrorCode로 표시될 수 있습니다. 기존 성공 내용은 실패 시 보존합니다. HTML은 신뢰하지 말고 화면에 안전하게 렌더링하세요.";
         if(path.contains("/onboarding"))return "8개 단계 BASIC_INFO, MAJORS, PREFERENCES, COURSES, PROJECTS, INTERNSHIPS, AWARDS, CERTIFICATIONS. 상태 NOT_STARTED, COMPLETED, SKIPPED. 순서 강제나 기존 입력으로부터 자동 완료 추론은 하지 않습니다.";
         if(path.equals("/api/v1/auth/signup"))return "별도 아이디 없이 schoolEmail을 로그인 식별자로 사용합니다. 비밀번호 10~64자 및 UTF-8 72바이트 이하, 이름 필수 최대 100자, isTransfer 필수. 학교 이메일은 소문자 sju.ac.kr/sejong.co.kr. 가입 전 schoolEmail 인증 필수. 같은 세션의 인증 완료가 10분 이내여야 하며 가입 트랜잭션에서 한 번만 소비합니다. 성공 201, emailVerified=true; 자동 로그인·자동 메일 발송 없음.";
-        if(path.equals("/api/v1/auth/login"))return "schoolEmail과 password로 인증합니다. 소문자 학교 이메일 전체 주소를 입력하세요. 별도 아이디나 학번으로 로그인할 수 없습니다. 성공 시 JSESSIONID 세션 쿠키를 설정하고 프로필을 반환합니다. 기존 CSRF 토큰은 폐기되므로 새 토큰을 받으세요.";
+        if(path.equals("/api/v1/auth/login"))return "schoolEmail과 password로 인증합니다. 소문자 학교 이메일 전체 주소를 입력하세요. 별도 아이디나 학번으로 로그인할 수 없습니다. Render 개발 서버에서는 SMTP가 꺼져 있으므로 학교 이메일 인증을 마친 기존 테스트 계정으로 로그인하세요. 성공 시 JSESSIONID 세션 쿠키를 설정하고 프로필을 반환합니다. 기존 CSRF 토큰은 폐기되므로 새 토큰을 받으세요.";
         if(path.equals("/api/v1/me/password"))return "현재 비밀번호 확인 후 새 비밀번호(10~64자, UTF-8 72바이트 이하)를 설정합니다. 기존 모든 세션을 만료하고 현재 세션에서 로그아웃합니다.";
         if(path.equals("/api/v1/student-codes/{type}"))return "type: majors, major-completion-types, certifications, tech-stacks, job-categories, regions, employment-types, salary-units.";
         if(method==PathItem.HttpMethod.PUT)return "해당 리소스 또는 선택 목록 전체를 교체합니다. 목록은 최대 100개이며 중복 코드 불가, 코드 사전에 존재해야 합니다. 빈 목록은 선택 해제.";
