@@ -20,6 +20,11 @@ import static org.springframework.security.test.web.servlet.setup.SecurityMockMv
 @ContextConfiguration(initializers=TestDatabase.class)
 class DocumentationDisabledTests {
     @Autowired WebApplicationContext context;
+    @Test void readinessIsPublicWithDocumentationDisabled() throws Exception {
+        var mvc=MockMvcBuilders.webAppContextSetup(context).apply(springSecurity()).build();
+        mvc.perform(get("/healthz")).andExpect(status().isNoContent())
+            .andExpect(header().doesNotExist("Set-Cookie"));
+    }
     @Test void documentationAndDemoAreNotPublicByDefault() throws Exception {
         var mvc=MockMvcBuilders.webAppContextSetup(context).apply(springSecurity()).build();
         for(String path:new String[]{"/swagger-ui.html","/swagger-ui/index.html","/v3/api-docs","/v3/api-docs.yaml","/demo","/demo/","/demo/app.js","/demo/api-client.js","/demo/styles.css"})

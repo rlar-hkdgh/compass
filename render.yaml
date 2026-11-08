@@ -6,12 +6,16 @@ services:
     region: singapore
     branch: dev
     autoDeployTrigger: "off"
-    healthCheckPath: /v3/api-docs
+    healthCheckPath: /healthz
     envVars:
       - key: SPRING_PROFILES_ACTIVE
         value: supabase
       - key: SUPABASE_DB_PASSWORD
         sync: false
+      - key: JAVA_TOOL_OPTIONS
+        value: "-XX:TieredStopAtLevel=1"
+      - key: SPRING_DATA_JPA_REPOSITORIES_BOOTSTRAP_MODE
+        value: lazy
       - key: API_DOCS_ENABLED
         value: "true"
       - key: MAIL_ENABLED
